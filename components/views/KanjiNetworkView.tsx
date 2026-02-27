@@ -50,35 +50,46 @@ export const KanjiNetworkView: React.FC<KanjiNetworkViewProps> = ({ char, db, on
         if (!cv || !container) return;
         
         const rect = container.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+
         const dpr = window.devicePixelRatio || 1;
         
-        // Match container size with DPR for crisp lines
-        cv.width = rect.width * dpr;
-        cv.height = rect.height * dpr;
-        
-        const ctx = cv.getContext('2d');
-        if (ctx) {
-            ctx.scale(dpr, dpr);
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
+        // Only resize if dimensions changed to avoid clearing content unnecessarily
+        if (cv.width !== rect.width * dpr || cv.height !== rect.height * dpr) {
+            cv.width = rect.width * dpr;
+            cv.height = rect.height * dpr;
             
-            // ALWAYS try to load saved draft, regardless of autosave setting
-            const saved = localStorage.getItem(`draft_${char}`);
-            if (saved) {
-                const img = new Image();
-                img.onload = () => {
-                    ctx.drawImage(img, 0, 0, rect.width, rect.height);
-                };
-                img.src = saved;
+            const ctx = cv.getContext('2d');
+            if (ctx) {
+                ctx.scale(dpr, dpr);
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                
+                // Restore context settings
+                ctx.strokeStyle = tool === 'eraser' ? '#0B1120' : color;
+                ctx.lineWidth = tool === 'highlighter' ? 15 : tool === 'pen' ? 2 : 20;
+                ctx.globalAlpha = tool === 'highlighter' ? 0.3 : 1;
+                if (tool === 'eraser') ctx.globalAlpha = 1;
+
+                // ALWAYS try to load saved draft, regardless of autosave setting
+                const saved = localStorage.getItem(`draft_${char}`);
+                if (saved) {
+                    const img = new Image();
+                    img.onload = () => {
+                        ctx.drawImage(img, 0, 0, rect.width, rect.height);
+                    };
+                    img.src = saved;
+                }
             }
         }
     };
 
     useEffect(() => {
         initCanvas();
-        window.addEventListener('resize', initCanvas);
-        return () => window.removeEventListener('resize', initCanvas);
-    }, [char]); // Re-init when char changes
+        const resizeObserver = new ResizeObserver(() => initCanvas());
+        if (containerRef.current) resizeObserver.observe(containerRef.current);
+        return () => resizeObserver.disconnect();
+    }, [char, tool, color]); // Re-init when char or tools change to ensure context is correct
 
     const saveDraft = () => {
         const cv = canvasRef.current;
@@ -101,8 +112,15 @@ export const KanjiNetworkView: React.FC<KanjiNetworkViewProps> = ({ char, db, on
         const cv = canvasRef.current;
         if (!cv) return { x: 0, y: 0 };
         const rect = cv.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        
+        let clientX, clientY;
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
         
         return { 
             x: clientX - rect.left, 
@@ -111,7 +129,8 @@ export const KanjiNetworkView: React.FC<KanjiNetworkViewProps> = ({ char, db, on
     };
 
     const startDrawing = (e: any) => {
-        if (e.cancelable) e.preventDefault(); // Prevent scrolling
+        if (e.cancelable && (e.type === 'touchstart' || e.type === 'touchmove')) e.preventDefault(); // Prevent scrolling on touch
+        
         if (tool === 'text') {
             const { x, y } = getPos(e);
             setTextInput({ x, y, text: '' });
@@ -124,7 +143,8 @@ export const KanjiNetworkView: React.FC<KanjiNetworkViewProps> = ({ char, db, on
         if (ctx) {
             ctx.beginPath();
             ctx.moveTo(x, y);
-            ctx.strokeStyle = tool === 'eraser' ? '#0B1120' : color; // Eraser paints background color
+            // Ensure context settings are current
+            ctx.strokeStyle = tool === 'eraser' ? '#0B1120' : color;
             ctx.lineWidth = tool === 'highlighter' ? 15 : tool === 'pen' ? 2 : 20;
             ctx.globalAlpha = tool === 'highlighter' ? 0.3 : 1;
             if (tool === 'eraser') ctx.globalAlpha = 1;
@@ -132,7 +152,8 @@ export const KanjiNetworkView: React.FC<KanjiNetworkViewProps> = ({ char, db, on
     };
 
     const draw = (e: any) => {
-        if (e.cancelable) e.preventDefault(); // Prevent scrolling
+        if (e.cancelable && (e.type === 'touchstart' || e.type === 'touchmove')) e.preventDefault(); // Prevent scrolling on touch
+        
         if (!isDrawing.current || tool === 'text') return;
         const { x, y } = getPos(e);
         const ctx = canvasRef.current?.getContext('2d');

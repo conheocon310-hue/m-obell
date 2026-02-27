@@ -129,18 +129,16 @@ export const KanjiExplorerView: React.FC<KanjiExplorerViewProps> = ({ db, onClos
 
     const MiniCanvas = ({ char }: { char: string }) => {
         const cvRef = useRef<HTMLCanvasElement>(null);
+        const containerRef = useRef<HTMLDivElement>(null);
         const isDrawing = useRef(false);
         const [showGhost, setShowGhost] = useState(false);
         const [inkColor, setInkColor] = useState('#ffffff');
         const [brushStyle, setBrushStyle] = useState<'pen' | 'marker'>('pen');
 
-        useEffect(() => {
+        const updateContext = () => {
             const cv = cvRef.current;
-            if(!cv) return;
-            cv.width = cv.parentElement?.offsetWidth || 300;
-            cv.height = cv.parentElement?.offsetHeight || 300;
-            const ctx = cv.getContext('2d');
-            if(ctx) { 
+            const ctx = cv?.getContext('2d');
+            if(ctx) {
                 ctx.strokeStyle = inkColor; 
                 ctx.lineWidth = brushStyle === 'pen' ? 4 : 12; 
                 ctx.lineCap = 'round'; 
@@ -148,27 +146,80 @@ export const KanjiExplorerView: React.FC<KanjiExplorerViewProps> = ({ db, onClos
                 ctx.shadowBlur = brushStyle === 'marker' ? 15 : 0;
                 ctx.shadowColor = inkColor;
             }
+        };
+
+        const initCanvas = () => {
+            const cv = cvRef.current;
+            const container = containerRef.current;
+            if(!cv || !container) return;
+            
+            const rect = container.getBoundingClientRect();
+            if(rect.width === 0 || rect.height === 0) return;
+
+            // Only resize if dimensions changed to avoid clearing content unnecessarily
+            if (cv.width !== rect.width || cv.height !== rect.height) {
+                cv.width = rect.width;
+                cv.height = rect.height;
+                updateContext();
+            }
+        };
+
+        useEffect(() => {
+            updateContext();
         }, [inkColor, brushStyle]);
 
-        const start = (e: any) => {
-            const cv = cvRef.current; if(!cv) return;
+        useEffect(() => {
+            initCanvas();
+            const resizeObserver = new ResizeObserver(() => initCanvas());
+            if (containerRef.current) resizeObserver.observe(containerRef.current);
+            return () => resizeObserver.disconnect();
+        }, []);
+
+        const getPos = (e: React.MouseEvent | React.TouchEvent) => {
+            const cv = cvRef.current;
+            if (!cv) return { x: 0, y: 0 };
             const rect = cv.getBoundingClientRect();
-            const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-            const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-            const ctx = cv.getContext('2d');
-            if(ctx) { isDrawing.current = true; ctx.beginPath(); ctx.moveTo(x, y); }
+            let clientX, clientY;
+            
+            if ('touches' in e) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = (e as React.MouseEvent).clientX;
+                clientY = (e as React.MouseEvent).clientY;
+            }
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
         };
-        const move = (e: any) => {
+
+        const start = (e: React.MouseEvent | React.TouchEvent) => {
+            if (e.cancelable && 'touches' in e) e.preventDefault();
+            isDrawing.current = true;
+            const ctx = cvRef.current?.getContext('2d');
+            const { x, y } = getPos(e);
+            if(ctx) { ctx.beginPath(); ctx.moveTo(x, y); }
+        };
+
+        const move = (e: React.MouseEvent | React.TouchEvent) => {
+            if (e.cancelable && 'touches' in e) e.preventDefault();
             if(!isDrawing.current) return;
-            const cv = cvRef.current; if(!cv) return;
-            const rect = cv.getBoundingClientRect();
-            const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-            const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-            const ctx = cv.getContext('2d');
+            const ctx = cvRef.current?.getContext('2d');
+            const { x, y } = getPos(e);
             if(ctx) { ctx.lineTo(x, y); ctx.stroke(); }
         };
+
         const end = () => { isDrawing.current = false; };
-        const clear = () => { const cv = cvRef.current; const ctx = cv?.getContext('2d'); if(cv && ctx) ctx.clearRect(0,0,cv.width, cv.height); };
+        
+        const clear = () => { 
+            const cv = cvRef.current; 
+            const ctx = cv?.getContext('2d'); 
+            if(cv && ctx) {
+                ctx.clearRect(0,0,cv.width, cv.height);
+                ctx.beginPath();
+            }
+        };
 
         return (
             <div className="w-full flex flex-col gap-2">
@@ -186,9 +237,14 @@ export const KanjiExplorerView: React.FC<KanjiExplorerViewProps> = ({ db, onClos
                         <button key={c} onClick={() => setInkColor(c)} className={`w-5 h-5 rounded-full border-2 ${inkColor === c ? 'border-white scale-110' : 'border-transparent'}`} style={{ backgroundColor: c }}></button>
                     ))}
                 </div>
-                <div className="w-full aspect-square bg-slate-950 border-2 border-indigo-500/50 rounded-xl relative overflow-hidden group">
+                <div ref={containerRef} className="w-full aspect-square bg-slate-950 border-2 border-indigo-500/50 rounded-xl relative overflow-hidden group touch-none">
                      {showGhost && <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20"><span className="font-serif text-[120px] text-white">{char}</span></div>}
-                     <canvas ref={cvRef} className="absolute inset-0 cursor-crosshair touch-none" onMouseDown={start} onMouseMove={move} onMouseUp={end} onMouseLeave={end} onTouchStart={start} onTouchMove={move} onTouchEnd={end} />
+                     <canvas 
+                        ref={cvRef} 
+                        className="absolute inset-0 cursor-crosshair touch-none w-full h-full" 
+                        onMouseDown={start} onMouseMove={move} onMouseUp={end} onMouseLeave={end} 
+                        onTouchStart={start} onTouchMove={move} onTouchEnd={end} 
+                    />
                 </div>
             </div>
         );

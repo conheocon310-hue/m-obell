@@ -297,13 +297,13 @@ export const Layout: React.FC<LayoutProps> = ({ title, onHome, onBack, onSetting
                 clearTimeout(timeoutId);
                 timeoutId = setTimeout(() => {
                     setIsBackButtonVisible(false);
-                }, 3000);
+                }, 2000);
             }
         };
 
         // Initial setup
         setIsBackButtonVisible(true);
-        timeoutId = setTimeout(() => setIsBackButtonVisible(false), 3000);
+        timeoutId = setTimeout(() => setIsBackButtonVisible(false), 2000);
 
         // Add event listeners for user activity
         window.addEventListener('mousemove', handleActivity);

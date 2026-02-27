@@ -175,12 +175,9 @@ const AnkiMode: React.FC<ReflexViewProps> = ({ vocab, srsStatus, onNext, current
                  
                  {/* Center: Progress */}
                  <div className="flex flex-col items-center gap-1">
-                     <div className="text-[10px] font-black uppercase text-slate-500 tracking-widest">
+                     <div className="text-[10px] font-black text-slate-400 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
                         {currentIndex + 1} / {total}
                      </div>
-                     <div className="h-1 w-24 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
-                        <div className="h-full bg-emerald-600 transition-all duration-300" style={{ width: `${((currentIndex + 1) / total) * 100}%` }}></div>
-                    </div>
                  </div>
                  
                  {/* Right: Reverse Button */}

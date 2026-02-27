@@ -280,7 +280,10 @@ export const StudyView: React.FC<StudyViewProps> = ({
 
                         {/* MEANING */}
                         <div className="flex-1 rounded-2xl border border-slate-700 bg-[#0B1120] p-3 flex flex-col justify-center relative overflow-hidden">
-                            <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Ý NGHĨA</span>
+                            <div className="flex justify-between items-center mb-1">
+                                <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Ý NGHĨA</span>
+                                {vocab.en && <span className="text-[8px] font-black text-sky-500 uppercase tracking-widest border border-sky-900/50 px-1.5 py-0.5 rounded bg-sky-950/30 max-w-[50%] truncate">{vocab.en}</span>}
+                            </div>
                             <div className="overflow-y-auto custom-scrollbar">
                                 <div className="text-lg font-black text-white leading-snug">{vocab.mean}</div>
                             </div>

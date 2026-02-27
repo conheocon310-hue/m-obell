@@ -259,8 +259,8 @@ export const WritingView: React.FC<WritingViewProps> = ({
                             <button onClick={handleReveal} className={`flex-1 rounded-xl font-black text-xs md:text-sm uppercase tracking-[0.2em] shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 px-4 ${isTimeOut ? 'bg-amber-600 text-white animate-bounce' : 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white'}`}><i className={`fas ${isTimeOut ? 'fa-eye' : 'fa-search'}`}></i> <span className="hidden sm:inline">{isTimeOut ? 'ĐÁP ÁN' : 'KIỂM TRA'}</span></button>
                         ) : (
                             <div className="flex-1 flex gap-2 animate-slide-up min-w-[150px] md:min-w-[200px]">
-                                <button onClick={() => handleGrade(false)} className="flex-1 bg-rose-950 border-2 border-rose-500 text-rose-500 rounded-xl font-black uppercase text-[10px] md:text-xs flex items-center justify-center gap-1 md:gap-2"><i className="fas fa-times"></i> SAI</button>
-                                <button onClick={() => handleGrade(true)} className="flex-1 bg-emerald-950 border-2 border-emerald-500 text-emerald-500 rounded-xl font-black uppercase text-[10px] md:text-xs flex items-center justify-center gap-1 md:gap-2"><i className="fas fa-check"></i> ĐÚNG</button>
+                                <button onClick={() => handleGrade(false)} className="flex-1 bg-rose-950 border-2 border-rose-500 text-rose-500 rounded-xl font-black uppercase text-xs md:text-sm flex items-center justify-center gap-1 md:gap-2 h-12 md:h-14"><i className="fas fa-times text-lg"></i> SAI</button>
+                                <button onClick={() => handleGrade(true)} className="flex-1 bg-emerald-950 border-2 border-emerald-500 text-emerald-500 rounded-xl font-black uppercase text-xs md:text-sm flex items-center justify-center gap-1 md:gap-2 h-12 md:h-14"><i className="fas fa-check text-lg"></i> ĐÚNG</button>
                             </div>
                         )}
                     </div>
