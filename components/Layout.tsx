@@ -247,6 +247,7 @@ export const Layout: React.FC<LayoutProps> = ({ title, onHome, onBack, onSetting
     const [isTopBarOpen, setIsTopBarOpen] = useState(false);
     const [isBackButtonVisible, setIsBackButtonVisible] = useState(true);
     const [showCheckInModal, setShowCheckInModal] = useState(false);
+    const [viewDate, setViewDate] = useState(new Date());
 
     const today = new Date().toISOString().split('T')[0];
     const wordsStudiedToday = db.studyLog[today] || 0;
@@ -261,10 +262,16 @@ export const Layout: React.FC<LayoutProps> = ({ title, onHome, onBack, onSetting
     };
 
     // Calendar logic
-    const currentYear = new Date().getFullYear();
-    const currentMonth = new Date().getMonth();
+    const currentYear = viewDate.getFullYear();
+    const currentMonth = viewDate.getMonth();
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+    
+    const changeMonth = (delta: number) => {
+        const newDate = new Date(viewDate);
+        newDate.setMonth(newDate.getMonth() + delta);
+        setViewDate(newDate);
+    };
     
     const calendarDays = [];
     for (let i = 0; i < firstDayOfMonth; i++) {
@@ -323,14 +330,14 @@ export const Layout: React.FC<LayoutProps> = ({ title, onHome, onBack, onSetting
     const progressPercent = totalVocab > 0 ? (masteredCount / totalVocab) * 100 : 0;
     const rankInfo = getRankByCount(masteredCount);
 
-    const SidebarItem = ({ icon: Icon, label, value, color, sublabel, onClick }: any) => {
+    const SidebarItem = ({ icon: Icon, label, value, iconColor, borderColor, bgColor, sublabel, onClick }: any) => {
         const Wrapper = onClick ? 'button' : 'div';
         return (
             <Wrapper 
                 onClick={onClick}
-                className={`flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 mb-3 w-full text-left ${onClick ? 'hover:bg-white/10 transition cursor-pointer active:scale-95' : ''}`}
+                className={`flex items-center gap-4 p-4 rounded-2xl bg-white/5 border ${borderColor || 'border-white/10'} w-full text-left ${onClick ? 'hover:bg-white/10 transition cursor-pointer active:scale-95' : ''}`}
             >
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-black/40 ${color} shadow-[0_0_15px_currentColor]`}>
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${bgColor || 'bg-black/40'} ${iconColor} shadow-[0_0_15px_currentColor]`}>
                     <Icon size={20} />
                 </div>
                 <div className="flex flex-col">
@@ -371,7 +378,7 @@ export const Layout: React.FC<LayoutProps> = ({ title, onHome, onBack, onSetting
                 className="absolute top-0 left-0 h-full w-72 bg-[#0A0A0A] border-r border-white/10 z-[210] p-6 flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-y-auto custom-scrollbar"
             >
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-sm font-black uppercase tracking-[0.15em] text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple truncate pr-2">
+                    <h2 className="text-sm font-black uppercase tracking-[0.15em] text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-400 truncate pr-2 drop-shadow-md">
                         {title !== "KOTOBA MASTER PRO" ? title : "Dashboard"}
                     </h2>
                     <button onClick={() => setIsSidebarOpen(false)} className="text-slate-500 hover:text-white transition shrink-0">
@@ -398,16 +405,41 @@ export const Layout: React.FC<LayoutProps> = ({ title, onHome, onBack, onSetting
                 </div>
 
                 {/* Rank Info */}
-                <div className={`p-5 rounded-2xl border-2 bg-slate-900/50 mb-6 flex flex-col items-center text-center ${rankInfo.color.split(' ')[2] || 'border-white/10'}`}>
+                <div className={`p-5 rounded-2xl border-2 bg-slate-900/50 mb-6 flex flex-col items-center text-center ${rankInfo.color.replace('text-', 'border-') || 'border-white/10'} shadow-[0_0_20px_rgba(0,0,0,0.3)]`}>
                     <div className="text-4xl mb-2 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">{rankInfo.icon}</div>
                     <div className={`text-xs font-black uppercase tracking-widest ${rankInfo.color}`}>{rankInfo.title}</div>
                     <div className="text-[9px] font-bold text-slate-500 mt-1">Đã thuộc {masteredCount} từ vựng</div>
                 </div>
 
-                <div className="flex-none mb-6">
-                    <SidebarItem icon={Flame} label="Chuỗi" value={streak} color="text-neon-amber" sublabel="Ngày liên tiếp" onClick={() => setShowCheckInModal(true)} />
-                    <SidebarItem icon={Layers} label="Tổng từ" value={totalVocab} color="text-neon-cyan" sublabel="Toàn bộ từ vựng" />
-                    <SidebarItem icon={CheckCircle} label="Tiến độ" value={`${Math.round(progressPercent)}%`} color="text-neon-lime" sublabel="Tỉ lệ hoàn thành" />
+                <div className="flex-none mb-6 space-y-3">
+                    <SidebarItem 
+                        icon={Flame} 
+                        label="Chuỗi" 
+                        value={streak} 
+                        iconColor="text-orange-500 animate-pulse" 
+                        borderColor="border-orange-500" 
+                        bgColor="bg-orange-500/20"
+                        sublabel="Ngày liên tiếp" 
+                        onClick={() => setShowCheckInModal(true)} 
+                    />
+                    <SidebarItem 
+                        icon={Layers} 
+                        label="Tổng từ" 
+                        value={totalVocab} 
+                        iconColor="text-neon-cyan" 
+                        borderColor="border-neon-cyan/50" 
+                        bgColor="bg-neon-cyan/10"
+                        sublabel="Toàn bộ từ vựng" 
+                    />
+                    <SidebarItem 
+                        icon={CheckCircle} 
+                        label="Tiến độ" 
+                        value={`${Math.round(progressPercent)}%`} 
+                        iconColor="text-neon-lime" 
+                        borderColor="border-neon-lime/50" 
+                        bgColor="bg-neon-lime/10"
+                        sublabel="Tỉ lệ hoàn thành" 
+                    />
                 </div>
 
                 <div className="mt-auto pt-6 border-t border-white/10">
@@ -481,8 +513,8 @@ export const Layout: React.FC<LayoutProps> = ({ title, onHome, onBack, onSetting
                                 <i className="fas fa-times"></i>
                             </button>
                             
-                            <div className="w-20 h-20 rounded-full bg-neon-amber/20 flex items-center justify-center mb-4 border border-neon-amber/50 shadow-[0_0_30px_rgba(245,158,11,0.3)]">
-                                <i className="fas fa-fire text-4xl text-neon-amber"></i>
+                            <div className="w-20 h-20 rounded-full bg-orange-500/20 flex items-center justify-center mb-4 border border-orange-500 shadow-[0_0_30px_rgba(249,115,22,0.5)] animate-pulse">
+                                <i className="fas fa-fire text-4xl text-orange-500"></i>
                             </div>
                             
                             <h2 className="text-2xl font-black text-white uppercase tracking-widest mb-2">Điểm Danh</h2>
@@ -490,7 +522,15 @@ export const Layout: React.FC<LayoutProps> = ({ title, onHome, onBack, onSetting
                             
                             {/* Calendar View */}
                             <div className="w-full bg-black/50 rounded-2xl p-4 mb-6 border border-white/5">
-                                <div className="text-xs font-black text-white uppercase tracking-widest mb-3">Tháng {currentMonth + 1} / {currentYear}</div>
+                                <div className="flex justify-between items-center mb-4">
+                                    <button onClick={() => changeMonth(-1)} className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition">
+                                        <i className="fas fa-chevron-left"></i>
+                                    </button>
+                                    <div className="text-xs font-black text-white uppercase tracking-widest">Tháng {currentMonth + 1} / {currentYear}</div>
+                                    <button onClick={() => changeMonth(1)} className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition">
+                                        <i className="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
                                 <div className="grid grid-cols-7 gap-1 mb-2">
                                     {['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'].map(d => (
                                         <div key={d} className="text-[10px] font-bold text-slate-500">{d}</div>
@@ -502,14 +542,25 @@ export const Layout: React.FC<LayoutProps> = ({ title, onHome, onBack, onSetting
                                         const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                                         const isCheckedIn = db.stats.checkIns?.includes(dateStr);
                                         const isToday = dateStr === today;
+                                        const isPast = new Date(dateStr) < new Date(today);
+                                        
+                                        let dayClass = "text-slate-500 border border-transparent"; // Default future/empty
+                                        
+                                        if (isCheckedIn) {
+                                            dayClass = "bg-black border border-green-500 text-white shadow-[0_0_10px_rgba(34,197,94,0.3)] relative overflow-hidden";
+                                        } else if (isToday) {
+                                            dayClass = "bg-gradient-to-br from-yellow-400 to-orange-500 border-2 border-white text-black font-black shadow-[0_0_20px_rgba(249,115,22,0.6)] scale-110 z-10";
+                                        } else if (isPast) {
+                                            dayClass = "bg-black border border-red-500 text-white opacity-60";
+                                        }
+
                                         return (
                                             <div 
                                                 key={day} 
-                                                className={`aspect-square rounded-full flex items-center justify-center text-xs font-bold transition-all
-                                                    ${isCheckedIn ? 'bg-neon-amber text-black shadow-[0_0_10px_rgba(245,158,11,0.5)]' : 
-                                                      isToday ? 'border border-neon-cyan text-neon-cyan' : 'text-slate-500'}`}
+                                                className={`aspect-square rounded-full flex items-center justify-center text-xs font-bold transition-all ${dayClass}`}
                                             >
                                                 {day}
+                                                {isCheckedIn && <i className="fas fa-check absolute text-[20px] text-green-500/20 pointer-events-none"></i>}
                                             </div>
                                         );
                                     })}
@@ -519,11 +570,11 @@ export const Layout: React.FC<LayoutProps> = ({ title, onHome, onBack, onSetting
                             <div className="w-full bg-black/50 rounded-2xl p-4 mb-6 border border-white/5">
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="text-xs font-bold text-slate-500 uppercase">Tiến độ hôm nay</span>
-                                    <span className="text-xs font-black text-neon-cyan">{wordsStudiedToday} / 20 từ</span>
+                                    <span className="text-xs font-black text-orange-400">{wordsStudiedToday} / 20 từ</span>
                                 </div>
-                                <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                                <div className="h-3 bg-slate-800 rounded-full overflow-hidden border border-white/5">
                                     <div 
-                                        className="h-full bg-gradient-to-r from-neon-cyan to-neon-purple transition-all duration-1000"
+                                        className="h-full bg-gradient-to-r from-orange-500 to-red-600 transition-all duration-1000 shadow-[0_0_15px_rgba(249,115,22,0.5)]"
                                         style={{ width: `${Math.min(100, (wordsStudiedToday / 20) * 100)}%` }}
                                     ></div>
                                 </div>
@@ -536,7 +587,7 @@ export const Layout: React.FC<LayoutProps> = ({ title, onHome, onBack, onSetting
                             ) : canCheckIn ? (
                                 <button 
                                     onClick={handleCheckIn}
-                                    className="w-full py-4 bg-neon-amber text-black rounded-xl font-black uppercase tracking-widest hover:bg-amber-400 transition shadow-[0_0_20px_rgba(245,158,11,0.4)] active:scale-95 flex items-center justify-center gap-2"
+                                    className="w-full py-4 bg-orange-500 text-white rounded-xl font-black uppercase tracking-widest hover:bg-orange-600 transition shadow-[0_0_20px_rgba(249,115,22,0.4)] active:scale-95 flex items-center justify-center gap-2"
                                 >
                                     <i className="fas fa-fire"></i> Điểm Danh Ngay
                                 </button>

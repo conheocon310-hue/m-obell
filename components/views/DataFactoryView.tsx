@@ -52,7 +52,6 @@ export const DataFactoryView: React.FC<DataFactoryProps> = ({ onImport, onClose,
             <div className="max-w-4xl mx-auto space-y-6">
                 <div className="flex justify-between items-center border-l-4 border-emerald-500 pl-4">
                     <h2 className="text-2xl font-black italic uppercase text-white tracking-widest">Xưởng dữ liệu</h2>
-                    <button onClick={onClose} className="text-slate-500 font-bold text-[10px] uppercase tracking-widest hover:text-white">Đóng</button>
                 </div>
                 
                 <div className="rounded-[1.25rem] border-[2.5px] border-emerald-500/30 p-8 space-y-6 bg-slate-900/50">
@@ -95,13 +94,9 @@ export const DataFactoryView: React.FC<DataFactoryProps> = ({ onImport, onClose,
                     <div className="space-y-2 relative">
                         <div className="flex justify-between items-end">
                             <label className="text-[9px] font-black text-indigo-400 uppercase tracking-widest">Dán dữ liệu (JSON Object/Array)</label>
-                            <button onClick={insertTemplate} className="text-[9px] font-black text-emerald-400 hover:text-emerald-300 uppercase bg-emerald-900/30 px-2 py-1 rounded">
-                                + Chèn mẫu Atomize V2
-                            </button>
                         </div>
-                        <div className="text-[10px] text-slate-500 mb-2 font-mono space-y-1">
+                        <div className="text-[10px] text-white/70 mb-2 font-mono space-y-1">
                             <div>Format chuẩn (JSON 11 trường): <span className="text-indigo-400">id, type, ka, kj, ro, hv, mean, on, kun, en</span></div>
-                            <div className="italic text-[9px] text-rose-400 font-bold">Lưu ý: type='vocab' cho từ ghép, type='kanji' cho chữ Hán lẻ.</div>
                         </div>
                         <textarea 
                             value={rawInput}

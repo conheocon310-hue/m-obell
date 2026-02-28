@@ -70,7 +70,7 @@ export const LessonListView: React.FC<LessonListProps> = ({ db, onSelect }) => {
                                     <div className="text-3xl md:text-4xl font-black text-white italic tracking-tighter group-hover:scale-110 transition-transform duration-300 drop-shadow-md">
                                         {lessonId}
                                     </div>
-                                    <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1 group-hover:text-white transition-colors">
+                                    <div className="text-[8px] font-black text-white/70 uppercase tracking-widest mt-1 group-hover:text-white transition-colors">
                                         {lessonWords.length} TỪ
                                     </div>
                                     <div className="mt-4 w-full px-2">
@@ -79,7 +79,7 @@ export const LessonListView: React.FC<LessonListProps> = ({ db, onSelect }) => {
                                         </div>
                                     </div>
                                     {/* Percentage Display requested */}
-                                    <div className="absolute bottom-2 right-2 text-[8px] font-black text-slate-500 group-hover:text-white/80">
+                                    <div className="absolute bottom-2 right-2 text-[8px] font-black text-white/70 group-hover:text-white">
                                         {progress}%
                                     </div>
                                 </Block>

@@ -253,14 +253,13 @@ export const KanjiExplorerView: React.FC<KanjiExplorerViewProps> = ({ db, onClos
     return (
         <section className="absolute inset-0 bg-slate-950/95 backdrop-blur-xl animate-slide-up flex flex-col overflow-hidden z-50">
             <div className="h-16 shrink-0 flex items-center justify-between px-4 sm:px-6 border-b border-white/10 bg-slate-900">
-                <h2 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500 uppercase tracking-widest italic">KHO BÁU KANJI</h2>
+                <h2 className="text-xl font-black text-white uppercase tracking-widest italic">KHO BÁU KANJI</h2>
                 <div className="flex gap-2">
                     {dueKanjiCount > 0 && (
                         <button onClick={onReviewDueKanji} className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-lg font-bold text-xs uppercase tracking-wider shadow-lg animate-pulse transition">
                             <i className="fas fa-fire mr-2"></i> Ôn tập ({dueKanjiCount})
                         </button>
                     )}
-                    <button onClick={onClose} className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-bold text-xs uppercase tracking-wider border border-slate-600 transition">Đóng</button>
                 </div>
             </div>
             <div className="flex p-4 gap-2 bg-slate-900/50 border-b border-slate-800 overflow-x-auto shrink-0">

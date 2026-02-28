@@ -80,19 +80,20 @@ export const DashboardView: React.FC<DashboardProps> = ({ db, onChangeView, onSt
                 <div className="flex flex-col sm:flex-row gap-4 shrink-0">
                     <BentoBlock 
                         onClick={() => dueCount > 0 ? onStartLesson('SRS') : onChangeView('lesson-list')}
-                        className={`flex-[2] relative flex flex-col justify-center items-center px-8 py-6 transition-all duration-500 overflow-hidden shrink-0 ${dueCount > 0 ? 'bg-gradient-to-br from-rose-950/50 to-black' : 'bg-gradient-to-br from-indigo-950/50 to-black'}`}
-                        colorClass={dueCount > 0 ? 'border-red-500 shadow-[0_0_40px_rgba(244,63,94,0.3)]' : 'border-indigo-500 shadow-[0_0_40px_rgba(99,102,241,0.2)]'}
+                        className={`flex-[2] relative flex flex-col justify-center items-center px-8 py-6 transition-all duration-500 overflow-hidden shrink-0 ${dueCount > 0 ? 'bg-slate-900/40 backdrop-blur-md' : 'bg-slate-900/40 backdrop-blur-md'}`}
+                        colorClass={dueCount > 0 ? 'border-red-500 shadow-[0_0_30px_rgba(244,63,94,0.3)]' : 'border-indigo-500 shadow-[0_0_30px_rgba(99,102,241,0.3)]'}
                     >
-                        <div className="text-[10px] font-black uppercase tracking-[0.5em] mb-2 relative z-10 glow-text text-white/60 text-center">
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 mix-blend-overlay"></div>
+                        <div className="text-[10px] font-black uppercase tracking-[0.5em] mb-2 relative z-10 glow-text text-white text-center">
                             {dueCount > 0 ? 'NHIỆM VỤ ƯU TIÊN' : 'HÀNH TRÌNH TIẾP THEO'}
                         </div>
                         <div className="flex items-baseline gap-4 mb-4 relative z-10">
-                            <span className={`text-6xl lg:text-8xl font-digital font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-${dueCount > 0 ? 'red-600' : 'indigo-500'} drop-shadow-2xl leading-none`}>
+                            <span className={`text-6xl lg:text-8xl font-digital font-bold text-white drop-shadow-2xl leading-none`}>
                                 {dueCount > 0 ? dueCount : 'READY'}
                             </span>
-                            <span className="text-sm font-black text-slate-500 uppercase tracking-widest origin-bottom-left" style={{ transform: 'rotate(90deg) translate(0px, -15px)' }}>{dueCount > 0 ? 'THẺ' : 'BÀI'}</span>
+                            <span className="text-sm font-black text-white/80 uppercase tracking-widest origin-bottom-left" style={{ transform: 'rotate(90deg) translate(0px, -15px)' }}>{dueCount > 0 ? 'THẺ' : 'BÀI'}</span>
                         </div>
-                        <div className={`flex items-center gap-3 text-xs font-bold text-white bg-gradient-to-r ${dueCount > 0 ? 'from-red-600 to-rose-600' : 'from-indigo-600 to-blue-600'} px-6 py-2 rounded-full shadow-lg group-hover:scale-110 transition duration-300 relative z-10 border border-white/20`}>
+                        <div className={`flex items-center gap-3 text-xs font-bold text-white bg-gradient-to-r ${dueCount > 0 ? 'from-red-600 via-rose-600 to-pink-600' : 'from-indigo-600 via-blue-600 to-cyan-600'} px-8 py-3 rounded-full shadow-lg group-hover:scale-110 transition duration-300 relative z-10 border border-white/30`}>
                             <span className="animate-pulse">{dueCount > 0 ? 'ÔN TẬP NGAY' : 'BẮT ĐẦU HỌC'}</span>
                             <i className={`fas ${dueCount > 0 ? 'fa-bolt' : 'fa-play'}`}></i>
                         </div>
@@ -101,32 +102,41 @@ export const DashboardView: React.FC<DashboardProps> = ({ db, onChangeView, onSt
                     {lastLessonId && (
                         <BentoBlock 
                             onClick={() => onStartLesson(lastLessonId)}
-                            className="flex-1 bg-gradient-to-br from-emerald-950/40 to-black flex flex-col items-center justify-center group py-4 shrink-0"
-                            colorClass="border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]"
+                            className="flex-1 bg-slate-900/40 backdrop-blur-md flex flex-col items-center justify-center group py-4 shrink-0 relative overflow-hidden"
+                            colorClass="border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
                         >
-                            <div className="text-[8px] font-black text-emerald-400 uppercase tracking-widest mb-1 opacity-60">Học tiếp</div>
-                            <div className="text-5xl font-black text-white italic tracking-tighter mb-3 group-hover:text-emerald-400 transition-colors">BÀI {lastLessonId}</div>
-                            <div className="text-[8px] font-bold text-emerald-500/80 border border-emerald-500/30 px-3 py-1 rounded-full uppercase tracking-[0.2em] group-hover:bg-emerald-500 group-hover:text-black transition-all">TIẾP TỤC</div>
+                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-emerald-500/10 via-transparent to-transparent"></div>
+                            <div className="text-[8px] font-black text-emerald-300 uppercase tracking-widest mb-1 opacity-80 relative z-10">Học tiếp</div>
+                            <div className="text-5xl font-black text-white italic tracking-tighter mb-3 group-hover:text-emerald-300 transition-colors relative z-10 text-shadow-lg">BÀI {lastLessonId}</div>
+                            <div className="text-[8px] font-bold text-emerald-950 bg-emerald-400 px-4 py-1.5 rounded-full uppercase tracking-[0.2em] group-hover:bg-white group-hover:text-emerald-600 transition-all relative z-10 shadow-lg">TIẾP TỤC</div>
                         </BentoBlock>
                     )}
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 shrink-0">
-                    <BentoBlock onClick={() => onChangeView('lesson-list')} colorClass="border-neon-cyan hover:border-white shadow-[0_0_15px_rgba(0,243,255,0.3)]" className="aspect-[2/1] md:aspect-square flex flex-col items-center justify-center gap-2 group p-4">
-                        <i className="fas fa-map-signs text-2xl md:text-3xl text-neon-cyan mb-1 group-hover:scale-110 transition"></i>
-                        <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest text-center">Lộ trình</span>
+                    <BentoBlock onClick={() => onChangeView('lesson-list')} colorClass="border-cyan-400 hover:border-white shadow-[0_0_20px_rgba(34,211,238,0.3)]" className="aspect-[2/1] md:aspect-square flex flex-col items-center justify-center gap-2 group p-4 bg-slate-900/40 backdrop-blur-md">
+                        <div className="w-12 h-12 rounded-full bg-cyan-500/10 flex items-center justify-center mb-1 group-hover:bg-cyan-500/30 transition-all shadow-[0_0_15px_rgba(34,211,238,0.2)]">
+                            <i className="fas fa-map-signs text-2xl md:text-3xl text-cyan-400 group-hover:scale-110 transition"></i>
+                        </div>
+                        <span className="text-[10px] font-black text-white uppercase tracking-widest text-center">Lộ trình</span>
                     </BentoBlock>
-                    <BentoBlock onClick={() => onChangeView('kanji-explorer')} colorClass="border-neon-amber hover:border-white shadow-[0_0_15px_rgba(255,170,0,0.3)]" className="aspect-[2/1] md:aspect-square flex flex-col items-center justify-center gap-2 group p-4">
-                        <i className="fas fa-th text-2xl md:text-3xl text-neon-amber mb-1 group-hover:scale-110 transition"></i>
-                        <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest text-center">Kho Kanji</span>
+                    <BentoBlock onClick={() => onChangeView('kanji-explorer')} colorClass="border-amber-500 hover:border-white shadow-[0_0_20px_rgba(245,158,11,0.3)]" className="aspect-[2/1] md:aspect-square flex flex-col items-center justify-center gap-2 group p-4 bg-slate-900/40 backdrop-blur-md">
+                        <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center mb-1 group-hover:bg-amber-500/30 transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+                            <i className="fas fa-th text-2xl md:text-3xl text-amber-500 group-hover:scale-110 transition"></i>
+                        </div>
+                        <span className="text-[10px] font-black text-white uppercase tracking-widest text-center">Kho Kanji</span>
                     </BentoBlock>
-                    <BentoBlock onClick={onOpenFav} colorClass="border-pink-500 hover:border-white shadow-[0_0_15px_rgba(236,72,153,0.3)]" className="aspect-[2/1] md:aspect-square flex flex-col items-center justify-center gap-2 group p-4">
-                        <i className="fas fa-heart text-2xl md:text-3xl text-pink-500 mb-1 group-hover:scale-110 transition"></i>
-                        <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest text-center">Yêu thích</span>
+                    <BentoBlock onClick={onOpenFav} colorClass="border-pink-500 hover:border-white shadow-[0_0_20px_rgba(236,72,153,0.3)]" className="aspect-[2/1] md:aspect-square flex flex-col items-center justify-center gap-2 group p-4 bg-slate-900/40 backdrop-blur-md">
+                        <div className="w-12 h-12 rounded-full bg-pink-500/10 flex items-center justify-center mb-1 group-hover:bg-pink-500/30 transition-all shadow-[0_0_15px_rgba(236,72,153,0.2)]">
+                            <i className="fas fa-heart text-2xl md:text-3xl text-pink-500 group-hover:scale-110 transition"></i>
+                        </div>
+                        <span className="text-[10px] font-black text-white uppercase tracking-widest text-center">Yêu thích</span>
                     </BentoBlock>
-                    <BentoBlock onClick={() => onChangeView('data-factory')} colorClass="border-neon-magenta hover:border-white shadow-[0_0_15px_rgba(255,0,255,0.3)]" className="aspect-[2/1] md:aspect-square flex flex-col items-center justify-center gap-2 group p-4">
-                        <i className="fas fa-database text-2xl md:text-3xl text-neon-magenta mb-1 group-hover:scale-110 transition"></i>
-                        <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest text-center">Dữ liệu</span>
+                    <BentoBlock onClick={() => onChangeView('data-factory')} colorClass="border-fuchsia-500 hover:border-white shadow-[0_0_20px_rgba(217,70,239,0.3)]" className="aspect-[2/1] md:aspect-square flex flex-col items-center justify-center gap-2 group p-4 bg-slate-900/40 backdrop-blur-md">
+                        <div className="w-12 h-12 rounded-full bg-fuchsia-500/10 flex items-center justify-center mb-1 group-hover:bg-fuchsia-500/30 transition-all shadow-[0_0_15px_rgba(217,70,239,0.2)]">
+                            <i className="fas fa-database text-2xl md:text-3xl text-fuchsia-500 group-hover:scale-110 transition"></i>
+                        </div>
+                        <span className="text-[10px] font-black text-white uppercase tracking-widest text-center">Dữ liệu</span>
                     </BentoBlock>
                 </div>
             </div>
@@ -169,16 +179,22 @@ export const DashboardView: React.FC<DashboardProps> = ({ db, onChangeView, onSt
                                      <div 
                                         key={i} 
                                         className={`
-                                            aspect-square rounded-md flex flex-col items-center justify-center border transition-all hover:scale-110 
-                                            ${d.isToday ? 'border-neon-cyan shadow-[0_0_10px_#00f3ff]' : ''} 
-                                            ${!d.isToday && d.count > 0 ? 'border-emerald-500' : ''}
-                                            ${!d.isToday && d.count === 0 ? 'border-slate-800' : ''}
-                                            ${d.count > 0 ? 'bg-emerald-900/20 text-emerald-400' : 'bg-slate-900 text-slate-600'}
+                                            aspect-square rounded-md flex flex-col items-center justify-center border-2 transition-all hover:scale-110 relative overflow-hidden
+                                            ${d.isToday 
+                                                ? 'bg-white border-yellow-400 text-black shadow-[0_0_15px_rgba(250,204,21,0.5)]' 
+                                                : d.count > 0 
+                                                    ? 'bg-black border-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.3)]' 
+                                                    : 'bg-black border-red-500 text-white opacity-80'
+                                            }
                                         `}
                                         title={`${d.iso}: ${d.count} bài học`}
                                     >
-                                         <span className={`text-[10px] font-bold ${d.isToday ? 'text-neon-cyan' : ''}`}>{d.dayNum}</span>
-                                         {d.count > 0 && <div className="w-1 h-1 rounded-full bg-emerald-500 mt-0.5"></div>}
+                                         {d.count > 0 && !d.isToday && (
+                                             <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
+                                                 <i className="fas fa-check text-2xl text-emerald-500"></i>
+                                             </div>
+                                         )}
+                                         <span className={`text-[10px] font-black ${d.isToday ? 'text-black' : 'text-white'}`}>{d.dayNum}</span>
                                      </div>
                                  );
                              })}

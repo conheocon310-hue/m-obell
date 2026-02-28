@@ -27,6 +27,24 @@ interface ConfirmModalProps {
 function App() {
     const [db, setDb] = useState<AppDatabase>(loadDB());
     const [view, setView] = useState<ViewName>('dashboard');
+    const [viewHistory, setViewHistory] = useState<ViewName[]>([]);
+
+    const changeView = (newView: ViewName) => {
+        if (newView === view) return;
+        setViewHistory(prev => [...prev, view]);
+        setView(newView);
+    };
+
+    const handleBack = () => {
+        if (viewHistory.length === 0) {
+            if (view !== 'dashboard') setView('dashboard');
+            return;
+        }
+        const prevView = viewHistory[viewHistory.length - 1];
+        setViewHistory(prev => prev.slice(0, -1));
+        setView(prevView);
+    };
+
     const [lessonId, setLessonId] = useState<string | null>(null);
     const [mode, setMode] = useState<ModeName>('study');
     const [studyType, setStudyType] = useState<'vocab' | 'kanji'>('vocab'); // Global Toggle
@@ -337,10 +355,13 @@ function App() {
 
         return (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/95 z-50 p-6 animate-slide-up backdrop-blur-xl">
-                <div className="max-w-md w-full text-center space-y-8">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-950 to-slate-950 pointer-events-none"></div>
+                <div className="max-w-md w-full text-center space-y-8 relative z-10">
                     <div>
-                        <i className="fas fa-flag-checkered text-6xl text-emerald-500 mb-4 animate-bounce"></i>
-                        <h2 className="text-4xl font-black text-white italic uppercase tracking-tighter">HOÀN THÀNH</h2>
+                        <div className="w-24 h-24 mx-auto bg-emerald-500/20 rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(16,185,129,0.3)] animate-bounce">
+                            <i className="fas fa-flag-checkered text-6xl text-emerald-500"></i>
+                        </div>
+                        <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-500 italic uppercase tracking-tighter drop-shadow-lg">HOÀN THÀNH</h2>
                         <p className="text-slate-400 font-bold uppercase tracking-widest mt-2">Bạn đã học hết danh sách hiện tại</p>
                     </div>
                     
@@ -350,9 +371,9 @@ function App() {
                                 setIsReviewSession(true);
                                 updateIndex(0);
                             }}
-                            className="py-4 bg-slate-800 border-2 border-slate-600 rounded-xl text-white font-black uppercase hover:bg-slate-700 hover:border-white transition shadow-lg active:scale-95"
+                            className="py-4 bg-gradient-to-r from-slate-800 to-slate-700 border-2 border-slate-600 rounded-xl text-white font-black uppercase hover:from-slate-700 hover:to-slate-600 hover:border-white transition shadow-lg active:scale-95 group"
                         >
-                            <i className="fas fa-redo-alt mr-2"></i> Ôn lại toàn bộ (Không lưu SRS)
+                            <i className="fas fa-redo-alt mr-2 text-slate-400 group-hover:text-white transition-colors"></i> Ôn lại toàn bộ (Không lưu SRS)
                         </button>
                         
                         {mistakesCount > 0 && (
@@ -366,15 +387,15 @@ function App() {
                                     setMode('reflex'); // Force reflex mode for review
                                     setView('reflex');
                                 }}
-                                className="py-4 bg-amber-900/50 border-2 border-amber-600 rounded-xl text-amber-500 font-black uppercase hover:bg-amber-800 hover:text-white hover:border-white transition shadow-lg active:scale-95"
+                                className="py-4 bg-gradient-to-r from-amber-900/80 to-orange-900/80 border-2 border-amber-600 rounded-xl text-amber-500 font-black uppercase hover:from-amber-800 hover:to-orange-800 hover:text-white hover:border-white transition shadow-[0_0_20px_rgba(245,158,11,0.3)] active:scale-95 group"
                             >
-                                <i className="fas fa-dumbbell mr-2"></i> Ôn lại từ sai ({mistakesCount}) (Lưu SRS)
+                                <i className="fas fa-dumbbell mr-2 text-amber-600 group-hover:text-white transition-colors"></i> Ôn lại từ sai ({mistakesCount}) (Lưu SRS)
                             </button>
                         )}
 
                         <button 
                             onClick={() => setView('dashboard')}
-                            className="py-4 bg-indigo-600 border-2 border-indigo-400 rounded-xl text-white font-black uppercase hover:bg-indigo-500 hover:border-white transition shadow-lg active:scale-95"
+                            className="py-4 bg-gradient-to-r from-indigo-600 to-blue-600 border-2 border-indigo-400 rounded-xl text-white font-black uppercase hover:from-indigo-500 hover:to-blue-500 hover:border-white transition shadow-[0_0_20px_rgba(99,102,241,0.4)] active:scale-95"
                         >
                             <i className="fas fa-home mr-2"></i> Trang chủ
                         </button>
@@ -546,7 +567,7 @@ function App() {
             case 'dashboard':
                 return <DashboardView 
                     db={db} 
-                    onChangeView={setView} 
+                    onChangeView={changeView} 
                     onStartLesson={(lid) => {
                         setLessonId(lid);
                         if (lid === 'SRS') {
@@ -554,25 +575,25 @@ function App() {
                             if (due.length === 0) { showToast("Không có từ cần ôn!", 'success'); return; }
                             setSrsQueue(due);
                             setMode('reflex');
-                            setView('reflex');
+                            changeView('reflex');
                         } else {
-                            setView('reflex-selector');
+                            changeView('reflex-selector');
                         }
                     }}
                     onCheckIn={handleCheckIn}
                     onOpenFav={() => setShowFavModal(true)}
                 />;
             case 'data-factory':
-                return <DataFactoryView onImport={handleImport} onClose={() => setView('dashboard')} onNotify={showToast} />;
+                return <DataFactoryView onImport={handleImport} onClose={handleBack} onNotify={showToast} />;
             case 'lesson-list':
-                return <LessonListView db={db} onSelect={(id) => { setLessonId(id); setView('reflex-selector'); }} />;
+                return <LessonListView db={db} onSelect={(id) => { setLessonId(id); changeView('reflex-selector'); }} onBack={handleBack} />;
             case 'settings':
                 return (
                     <div className="absolute inset-0 bg-black/80 backdrop-blur-xl z-50 flex items-center justify-center p-6 animate-slide-up">
                         <div className="bg-slate-900 border-2 border-slate-700 rounded-3xl p-8 max-w-md w-full shadow-2xl space-y-8">
                             <div className="flex justify-between items-center border-b border-slate-700 pb-4">
                                 <h2 className="text-xl font-black text-white uppercase tracking-widest">Cài đặt</h2>
-                                <button onClick={() => setView('dashboard')} className="text-slate-500 hover:text-white"><i className="fas fa-times"></i></button>
+                                <button onClick={handleBack} className="text-slate-500 hover:text-white"><i className="fas fa-times"></i></button>
                             </div>
 
                             {/* Font Size */}
@@ -607,7 +628,7 @@ function App() {
             case 'study':
                 if (activeVocab.length === 0) return <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 font-black uppercase p-6 text-center gap-4">
                     <div>CHƯA CÓ DỮ LIỆU {studyType === 'vocab' ? 'TỪ VỰNG' : 'KANJI'}</div>
-                    <button onClick={() => setView('reflex-selector')} className="px-6 py-2 bg-slate-800 rounded-lg text-white text-xs uppercase">Quay lại</button>
+                    <button onClick={handleBack} className="px-6 py-2 bg-slate-800 rounded-lg text-white text-xs uppercase">Quay lại</button>
                 </div>;
                 if (currentIndex >= activeVocab.length) return <CompletionScreen />;
                 return <StudyView 
@@ -629,20 +650,22 @@ function App() {
                             return newDb;
                         });
                     }} 
-                    onKanjiClick={(c) => { setNetworkChar(c); setView('kanji-network'); }} 
+                    onKanjiClick={(c) => { setNetworkChar(c); changeView('kanji-network'); }} 
                     onOpenRules={() => setShowRules(true)}
                     studyType={studyType}
                     onTypeChange={setStudyType}
                     vocabList={activeVocab}
                     onJump={updateIndex}
                     lessonId={lessonId || ''}
+                    onBack={handleBack}
                 />;
             case 'reflex-selector':
                 return (
                     <div className="absolute inset-0 flex items-center justify-center p-4 md:p-6 bg-slate-950/80 backdrop-blur-xl animate-slide-up z-50">
                         <div className="flex flex-col md:flex-row gap-4 md:gap-6 max-w-4xl w-full h-full md:h-auto max-h-[90vh]">
                             {/* LEFT PANEL: INFO */}
-                            <div className="flex-1 bg-slate-900 border-2 border-indigo-500 rounded-3xl p-4 md:p-8 relative overflow-hidden flex flex-col justify-center shadow-[0_0_40px_rgba(99,102,241,0.2)] shrink-0 min-h-[250px]">
+                            <div className="flex-1 bg-gradient-to-br from-slate-900 to-slate-950 border-2 border-indigo-500 rounded-3xl p-4 md:p-8 relative overflow-hidden flex flex-col justify-center shadow-[0_0_40px_rgba(99,102,241,0.3)] shrink-0 min-h-[250px]">
+                                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
                                 
                                 {/* RESET BUTTON - TOP LEFT */}
                                 <button 
@@ -664,27 +687,27 @@ function App() {
                                 <div className="absolute top-0 right-0 p-4 opacity-10 text-6xl md:text-9xl text-white font-black italic">#{lessonId}</div>
                                 <div className="relative z-10 mt-4 md:mt-8">
                                     <div className="text-xs md:text-sm font-black text-indigo-400 uppercase tracking-widest mb-1 md:mb-2">Đang chọn</div>
-                                    <h2 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter mb-4 md:mb-6">BÀI {lessonId}</h2>
+                                    <h2 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter mb-4 md:mb-6 drop-shadow-lg">BÀI {lessonId}</h2>
                                     
                                     <div className="space-y-3 md:space-y-4">
                                          {/* TYPE TOGGLE */}
-                                        <div className="flex bg-slate-950 p-1.5 md:p-2 rounded-xl border border-white/10">
+                                        <div className="flex bg-slate-950/50 p-1.5 md:p-2 rounded-xl border border-white/10 backdrop-blur-sm">
                                             <button 
                                                 onClick={() => setStudyType('vocab')}
-                                                className={`flex-1 py-2 md:py-3 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest transition ${studyType === 'vocab' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:text-white'}`}
+                                                className={`flex-1 py-2 md:py-3 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest transition ${studyType === 'vocab' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg border border-white/20' : 'text-slate-500 hover:text-white'}`}
                                             >
                                                 Từ Vựng
                                             </button>
                                             <button 
                                                 onClick={() => setStudyType('kanji')}
-                                                className={`flex-1 py-2 md:py-3 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest transition ${studyType === 'kanji' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-500 hover:text-white'}`}
+                                                className={`flex-1 py-2 md:py-3 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest transition ${studyType === 'kanji' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg border border-white/20' : 'text-slate-500 hover:text-white'}`}
                                             >
                                                 Kanji
                                             </button>
                                         </div>
-                                        <div className="text-[10px] md:text-xs text-slate-500 font-bold italic">
+                                        <div className="text-[10px] md:text-xs text-slate-400 font-bold italic bg-black/20 p-2 rounded-lg border border-white/5">
                                             * Chọn chế độ để bắt đầu. <br/>
-                                            {db.config.writingMode === 'shuffle' ? <span className="text-sky-400">⚡ Đang bật chế độ Trộn Ngẫu Nhiên</span> : <span>⬇️ Đang bật chế độ Tuần Tự</span>}
+                                            {db.config.writingMode === 'shuffle' ? <span className="text-sky-400 glow-text">⚡ Đang bật chế độ Trộn Ngẫu Nhiên</span> : <span className="text-slate-300">⬇️ Đang bật chế độ Tuần Tự</span>}
                                         </div>
                                     </div>
                                 </div>
@@ -692,11 +715,11 @@ function App() {
 
                             {/* RIGHT PANEL: ACTIONS */}
                             <div className="flex-1 space-y-2 md:space-y-3 flex flex-col justify-start overflow-y-auto pr-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-                                <button onClick={() => { setMode('study'); setView('study'); }} className="w-full py-4 md:py-5 px-4 md:px-6 border-l-4 border-indigo-500 bg-slate-900 hover:bg-slate-800 hover:translate-x-2 transition-all flex items-center gap-3 md:gap-4 group rounded-r-xl border-y border-r border-slate-700 shrink-0">
-                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-indigo-900/50 flex items-center justify-center text-indigo-400 group-hover:text-white group-hover:bg-indigo-600 transition"><i className="fas fa-book-open text-xs md:text-base"></i></div>
+                                <button onClick={() => { setMode('study'); changeView('study'); }} className="w-full py-4 md:py-5 px-4 md:px-6 border-l-4 border-indigo-500 bg-gradient-to-r from-slate-900 to-slate-800 hover:from-indigo-900/40 hover:to-slate-800 hover:translate-x-2 transition-all flex items-center gap-3 md:gap-4 group rounded-r-xl border-y border-r border-slate-700 hover:border-indigo-500/50 shrink-0 shadow-lg">
+                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-indigo-900/50 flex items-center justify-center text-indigo-400 group-hover:text-white group-hover:bg-indigo-600 transition shadow-[0_0_10px_rgba(99,102,241,0.3)]"><i className="fas fa-book-open text-xs md:text-base"></i></div>
                                     <div className="text-left">
-                                        <div className="text-xs md:text-sm font-black text-white uppercase tracking-wider">Học tập 3 tầng</div>
-                                        <div className="text-[8px] md:text-[10px] text-slate-500 font-bold">Phương pháp ghi nhớ sâu</div>
+                                        <div className="text-xs md:text-sm font-black text-white uppercase tracking-wider group-hover:text-indigo-300 transition-colors">Học tập 3 tầng</div>
+                                        <div className="text-[8px] md:text-[10px] text-slate-500 font-bold group-hover:text-slate-400">Phương pháp ghi nhớ sâu</div>
                                     </div>
                                 </button>
                                 <button onClick={() => { 
@@ -708,40 +731,40 @@ function App() {
 
                                     setReflexInitialMode('anki'); 
                                     setMode('reflex'); 
-                                    setView('reflex'); 
-                                }} className="w-full py-4 md:py-5 px-4 md:px-6 border-l-4 border-purple-500 bg-slate-900 hover:bg-slate-800 hover:translate-x-2 transition-all flex items-center gap-3 md:gap-4 group rounded-r-xl border-y border-r border-slate-700 shrink-0">
-                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-purple-900/50 flex items-center justify-center text-purple-400 group-hover:text-white group-hover:bg-purple-600 transition"><i className="fas fa-layer-group text-xs md:text-base"></i></div>
+                                    changeView('reflex'); 
+                                }} className="w-full py-4 md:py-5 px-4 md:px-6 border-l-4 border-purple-500 bg-gradient-to-r from-slate-900 to-slate-800 hover:from-purple-900/40 hover:to-slate-800 hover:translate-x-2 transition-all flex items-center gap-3 md:gap-4 group rounded-r-xl border-y border-r border-slate-700 hover:border-purple-500/50 shrink-0 shadow-lg">
+                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-purple-900/50 flex items-center justify-center text-purple-400 group-hover:text-white group-hover:bg-purple-600 transition shadow-[0_0_10px_rgba(168,85,247,0.3)]"><i className="fas fa-layer-group text-xs md:text-base"></i></div>
                                     <div className="text-left">
-                                        <div className="text-xs md:text-sm font-black text-white uppercase tracking-wider">Ôn tập Reflex</div>
-                                        <div className="text-[8px] md:text-[10px] text-slate-500 font-bold">Phản xạ nhanh Anki</div>
+                                        <div className="text-xs md:text-sm font-black text-white uppercase tracking-wider group-hover:text-purple-300 transition-colors">Ôn tập Reflex</div>
+                                        <div className="text-[8px] md:text-[10px] text-slate-500 font-bold group-hover:text-slate-400">Phản xạ nhanh Anki</div>
                                     </div>
                                 </button>
 
-                                <button onClick={() => { setMode('blitz'); setView('blitz-game'); }} className="w-full py-4 md:py-5 px-4 md:px-6 border-l-4 border-amber-500 bg-slate-900 hover:bg-slate-800 hover:translate-x-2 transition-all flex items-center gap-3 md:gap-4 group rounded-r-xl border-y border-r border-slate-700 shrink-0">
-                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-amber-900/50 flex items-center justify-center text-amber-400 group-hover:text-white group-hover:bg-amber-600 transition"><i className="fas fa-bolt text-xs md:text-base"></i></div>
+                                <button onClick={() => { setMode('blitz'); changeView('blitz-game'); }} className="w-full py-4 md:py-5 px-4 md:px-6 border-l-4 border-amber-500 bg-gradient-to-r from-slate-900 to-slate-800 hover:from-amber-900/40 hover:to-slate-800 hover:translate-x-2 transition-all flex items-center gap-3 md:gap-4 group rounded-r-xl border-y border-r border-slate-700 hover:border-amber-500/50 shrink-0 shadow-lg">
+                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-amber-900/50 flex items-center justify-center text-amber-400 group-hover:text-white group-hover:bg-amber-600 transition shadow-[0_0_10px_rgba(245,158,11,0.3)]"><i className="fas fa-bolt text-xs md:text-base"></i></div>
                                     <div className="text-left">
-                                        <div className="text-xs md:text-sm font-black text-white uppercase tracking-wider">Blitz Game</div>
-                                        <div className="text-[8px] md:text-[10px] text-slate-500 font-bold">Trò chơi tốc độ cao</div>
+                                        <div className="text-xs md:text-sm font-black text-white uppercase tracking-wider group-hover:text-amber-300 transition-colors">Blitz Game</div>
+                                        <div className="text-[8px] md:text-[10px] text-slate-500 font-bold group-hover:text-slate-400">Trò chơi tốc độ cao</div>
                                     </div>
                                 </button>
 
-                                <button onClick={() => { setMode('cram'); setView('cram'); }} className="w-full py-4 md:py-5 px-4 md:px-6 border-l-4 border-rose-600 bg-slate-900 hover:bg-slate-800 hover:translate-x-2 transition-all flex items-center gap-3 md:gap-4 group rounded-r-xl border-y border-r border-slate-700 shrink-0">
-                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-rose-900/50 flex items-center justify-center text-rose-500 group-hover:text-white group-hover:bg-rose-600 transition"><i className="fas fa-biohazard text-xs md:text-base"></i></div>
+                                <button onClick={() => { setMode('cram'); changeView('cram'); }} className="w-full py-4 md:py-5 px-4 md:px-6 border-l-4 border-rose-600 bg-gradient-to-r from-slate-900 to-slate-800 hover:from-rose-900/40 hover:to-slate-800 hover:translate-x-2 transition-all flex items-center gap-3 md:gap-4 group rounded-r-xl border-y border-r border-slate-700 hover:border-rose-600/50 shrink-0 shadow-lg">
+                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-rose-900/50 flex items-center justify-center text-rose-500 group-hover:text-white group-hover:bg-rose-600 transition shadow-[0_0_10px_rgba(225,29,72,0.3)]"><i className="fas fa-biohazard text-xs md:text-base"></i></div>
                                     <div className="text-left">
-                                        <div className="text-xs md:text-sm font-black text-white uppercase tracking-wider">Cram Mode</div>
-                                        <div className="text-[8px] md:text-[10px] text-slate-500 font-bold">Nhồi nhét & Kỷ luật thép</div>
+                                        <div className="text-xs md:text-sm font-black text-white uppercase tracking-wider group-hover:text-rose-300 transition-colors">Cram Mode</div>
+                                        <div className="text-[8px] md:text-[10px] text-slate-500 font-bold group-hover:text-slate-400">Nhồi nhét & Kỷ luật thép</div>
                                     </div>
                                 </button>
 
-                                <button onClick={() => { setMode('writing'); setView('writing'); }} className="w-full py-4 md:py-5 px-4 md:px-6 border-l-4 border-blue-500 bg-slate-900 hover:bg-slate-800 hover:translate-x-2 transition-all flex items-center gap-3 md:gap-4 group rounded-r-xl border-y border-r border-slate-700 shrink-0">
-                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-900/50 flex items-center justify-center text-blue-400 group-hover:text-white group-hover:bg-blue-600 transition"><i className="fas fa-pen-nib text-xs md:text-base"></i></div>
+                                <button onClick={() => { setMode('writing'); changeView('writing'); }} className="w-full py-4 md:py-5 px-4 md:px-6 border-l-4 border-blue-500 bg-gradient-to-r from-slate-900 to-slate-800 hover:from-blue-900/40 hover:to-slate-800 hover:translate-x-2 transition-all flex items-center gap-3 md:gap-4 group rounded-r-xl border-y border-r border-slate-700 hover:border-blue-500/50 shrink-0 shadow-lg">
+                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-900/50 flex items-center justify-center text-blue-400 group-hover:text-white group-hover:bg-blue-600 transition shadow-[0_0_10px_rgba(59,130,246,0.3)]"><i className="fas fa-pen-nib text-xs md:text-base"></i></div>
                                     <div className="text-left">
-                                        <div className="text-xs md:text-sm font-black text-white uppercase tracking-wider">Luyện viết</div>
-                                        <div className="text-[8px] md:text-[10px] text-slate-500 font-bold">Tập viết Kanji & Kana</div>
+                                        <div className="text-xs md:text-sm font-black text-white uppercase tracking-wider group-hover:text-blue-300 transition-colors">Luyện viết</div>
+                                        <div className="text-[8px] md:text-[10px] text-slate-500 font-bold group-hover:text-slate-400">Tập viết Kanji & Kana</div>
                                     </div>
                                 </button>
                                 
-                                <button onClick={() => setView('dashboard')} className="w-full py-3 mt-2 md:mt-4 text-[10px] md:text-xs font-black uppercase text-slate-500 hover:text-white transition bg-slate-900/50 rounded-lg border border-slate-700 hover:border-white/20 shrink-0">
+                                <button onClick={handleBack} className="w-full py-3 mt-2 md:mt-4 text-[10px] md:text-xs font-black uppercase text-slate-500 hover:text-white transition bg-slate-900/50 rounded-lg border border-slate-700 hover:border-white/20 shrink-0">
                                     <i className="fas fa-times mr-2"></i> Đóng Menu
                                 </button>
                             </div>
@@ -760,7 +783,7 @@ function App() {
                                     <p className="text-slate-400 font-bold uppercase tracking-widest mt-2">Bạn đã hoàn thành danh sách ôn tập</p>
                                 </div>
                                 <button 
-                                    onClick={() => setView('dashboard')}
+                                    onClick={() => changeView('dashboard')}
                                     className="w-full py-4 bg-indigo-600 border-2 border-indigo-400 rounded-xl text-white font-black uppercase hover:bg-indigo-500 hover:border-white transition shadow-lg active:scale-95"
                                 >
                                     <i className="fas fa-home mr-2"></i> Về Trang chủ
@@ -774,38 +797,38 @@ function App() {
 
                 if (activeVocab.length === 0 || !activeVocab[currentIndex]) return <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-slate-500 font-black uppercase">
                     <div>CHƯA CÓ DỮ LIỆU {studyType.toUpperCase()}</div>
-                    <button onClick={() => setView('reflex-selector')} className="px-4 py-2 bg-slate-800 rounded text-xs text-white">Quay lại</button>
+                    <button onClick={handleBack} className="px-4 py-2 bg-slate-800 rounded text-xs text-white">Quay lại</button>
                 </div>;
                 
-                return <ReflexView vocab={activeVocab[currentIndex]} allVocab={activeVocab} srsStatus={db.srs[activeVocab[currentIndex]?.id]} onNext={handleResult} onPrev={() => updateIndex(currentIndex - 1)} currentIndex={currentIndex} total={activeVocab.length} db={db} initialMode={reflexInitialMode} lessonId={lessonId || ''} mode={mode} />;
+                return <ReflexView vocab={activeVocab[currentIndex]} allVocab={activeVocab} srsStatus={db.srs[activeVocab[currentIndex]?.id]} onNext={handleResult} onPrev={() => updateIndex(currentIndex - 1)} currentIndex={currentIndex} total={activeVocab.length} db={db} initialMode={reflexInitialMode} lessonId={lessonId || ''} mode={mode} onBack={handleBack} />;
             case 'cram':
                 if (activeVocab.length === 0) return <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-slate-500 font-black uppercase text-center p-4">
                     <div>CẦN DỮ LIỆU ĐỂ SỬ DỤNG TÍNH NĂNG NÀY<br/>(HIỆN CÓ {activeVocab.length} {studyType.toUpperCase()})</div>
-                    <button onClick={() => setView('reflex-selector')} className="px-4 py-2 bg-slate-800 rounded text-xs text-white">Quay lại</button>
+                    <button onClick={handleBack} className="px-4 py-2 bg-slate-800 rounded text-xs text-white">Quay lại</button>
                 </div>;
-                return <CramModeView vocabList={activeVocab} lessonId={lessonId!} db={db} onUpdateDb={handleUpdateDb} onClose={() => setView('reflex-selector')} />;
+                return <CramModeView vocabList={activeVocab} lessonId={lessonId!} db={db} onUpdateDb={handleUpdateDb} onClose={handleBack} />;
             case 'writing':
                 if (activeVocab.length > 0 && currentIndex >= activeVocab.length) return <CompletionScreen />;
 
                 if (activeVocab.length === 0 || !activeVocab[currentIndex]) return <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-slate-500 font-black uppercase">
                     <div>CHƯA CÓ DỮ LIỆU {studyType.toUpperCase()}</div>
-                    <button onClick={() => setView('reflex-selector')} className="px-4 py-2 bg-slate-800 rounded text-xs text-white">Quay lại</button>
+                    <button onClick={handleBack} className="px-4 py-2 bg-slate-800 rounded text-xs text-white">Quay lại</button>
                 </div>;
                 
-                return <WritingView vocab={activeVocab[currentIndex]} onSwitchToReflex={handleSwitchToReflex} timerSettings={{ duration: db.config.writingTimer || 0, mode: db.config.writingMode || 'sequential' }} onUpdateSettings={handleUpdateWritingSettings} onNext={() => updateIndex(currentIndex + 1)} onPrev={() => updateIndex(currentIndex - 1)} onGrade={handleResult} index={currentIndex} total={activeVocab.length} lessonId={lessonId || ''} />;
+                return <WritingView vocab={activeVocab[currentIndex]} onSwitchToReflex={handleSwitchToReflex} timerSettings={{ duration: db.config.writingTimer || 0, mode: db.config.writingMode || 'sequential' }} onUpdateSettings={handleUpdateWritingSettings} onNext={() => updateIndex(currentIndex + 1)} onPrev={() => updateIndex(currentIndex - 1)} onGrade={handleResult} index={currentIndex} total={activeVocab.length} lessonId={lessonId || ''} onBack={handleBack} />;
             case 'blitz-game':
                 if (activeVocab.length < 4) return <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-slate-500 font-black uppercase text-center p-4">
                     <div>CẦN TỐI THIỂU 4 TỪ ĐỂ CHƠI BLITZ<br/>(HIỆN CÓ {activeVocab.length} {studyType.toUpperCase()})</div>
-                    <button onClick={() => setView('reflex-selector')} className="px-4 py-2 bg-slate-800 rounded text-xs text-white">Quay lại</button>
+                    <button onClick={handleBack} className="px-4 py-2 bg-slate-800 rounded text-xs text-white">Quay lại</button>
                 </div>;
-                return <BlitzGameView lessonId={lessonId!} vocabList={activeVocab} db={db} onClose={() => setView('reflex-selector')} onOpenRules={() => setShowRules(true)} />;
+                return <BlitzGameView lessonId={lessonId!} vocabList={activeVocab} db={db} onClose={handleBack} onOpenRules={() => setShowRules(true)} />;
             case 'kanji-network':
-                return <KanjiNetworkView char={networkChar || ''} db={db} onClose={() => setView('study')} onOpenRules={() => setShowRules(true)} />;
+                return <KanjiNetworkView char={networkChar || ''} db={db} onClose={handleBack} onOpenRules={() => setShowRules(true)} />;
             case 'kanji-explorer':
                 return <KanjiExplorerView 
                     db={db} 
-                    onClose={() => setView('dashboard')} 
-                    onReviewLesson={(id) => { setLessonId(id); setView('reflex-selector'); }} 
+                    onClose={handleBack} 
+                    onReviewLesson={(id) => { setLessonId(id); changeView('reflex-selector'); }} 
                     onReviewDueKanji={() => {
                         const due = getDueVocab(db, 'kanji');
                         if (due.length === 0) { showToast("Không có Kanji cần ôn!", 'success'); return; }
@@ -813,11 +836,11 @@ function App() {
                         setLessonId('SRS');
                         setStudyType('kanji');
                         setMode('reflex');
-                        setView('reflex');
+                        changeView('reflex');
                     }}
                 />;
             case 'rule-explorer':
-                return <RuleExplorerView db={db} onClose={() => setView('dashboard')} />;
+                return <RuleExplorerView db={db} onClose={handleBack} />;
             default: return null;
         }
     };
@@ -866,7 +889,17 @@ function App() {
     };
 
     return (
-        <Layout db={db} title={getTitle()} onHome={() => setView('dashboard')} onBack={() => setView('dashboard')} showBack={view !== 'dashboard'} showHome={view !== 'blitz-game'} onSettings={() => setView('settings')} onOpenRules={() => setShowRules(true)} onCheckIn={handleCheckIn}>
+        <Layout 
+            db={db} 
+            title={getTitle()} 
+            onHome={() => changeView('dashboard')} 
+            onBack={handleBack} 
+            showBack={view !== 'dashboard'} 
+            showHome={view !== 'blitz-game'} 
+            onSettings={() => changeView('settings')} 
+            onOpenRules={() => setShowRules(true)} 
+            onCheckIn={handleCheckIn}
+        >
             {renderContent()}
             {showResetSelector && <ResetSelectorModal />}
             {showExportSelector && <ExportSelectorModal />}

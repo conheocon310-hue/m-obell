@@ -220,17 +220,18 @@ export const StudyView: React.FC<StudyViewProps> = ({
                 
                 {/* TOP: MAIN VISUAL CARD */}
                 <div 
-                    className="flex-1 rounded-3xl border-2 border-indigo-500/50 bg-[#0B1120] flex flex-col items-center justify-center shadow-[0_0_40px_rgba(99,102,241,0.1)] group overflow-hidden relative min-h-0"
+                    className="flex-1 rounded-3xl border-2 border-indigo-500 bg-slate-900/20 backdrop-blur-md flex flex-col items-center justify-center shadow-[0_0_30px_rgba(99,102,241,0.2)] group overflow-hidden relative min-h-0"
                     onClick={() => onKanjiClick(mainVisual)}
                 >
+                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diagmonds-light.png')] opacity-10 mix-blend-overlay"></div>
                     <div className="absolute top-4 right-4 text-slate-600 hover:text-pink-500 transition cursor-pointer z-20" onClick={(e) => { e.stopPropagation(); onToggleFav(); }}>
-                        <i className={`fas fa-heart text-xl ${isFavorite ? 'text-pink-500' : ''}`}></i>
+                        <i className={`fas fa-heart text-2xl ${isFavorite ? 'text-pink-500 drop-shadow-[0_0_10px_rgba(236,72,153,0.5)]' : ''}`}></i>
                     </div>
                     
                     {/* CONSTRAINT CONTAINER */}
-                    <div className="w-[85%] h-[70%] flex items-center justify-center overflow-hidden mb-8" style={{ containerType: 'inline-size' }}>
+                    <div className="w-[85%] h-[70%] flex items-center justify-center overflow-hidden mb-8 relative z-10" style={{ containerType: 'inline-size' }}>
                         <div 
-                            className={`font-serif text-white transition-transform duration-300 group-hover:scale-105 select-none text-center whitespace-nowrap`} 
+                            className={`font-serif text-white transition-transform duration-300 group-hover:scale-105 select-none text-center whitespace-nowrap drop-shadow-2xl`} 
                             style={{ 
                                 fontSize: fontSize, 
                                 lineHeight: 1,
@@ -241,7 +242,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
                         </div>
                     </div>
                     
-                    <div className="absolute bottom-4 text-[8px] font-black text-indigo-500/50 uppercase tracking-[0.3em] animate-pulse pointer-events-none">
+                    <div className="absolute bottom-4 text-[8px] font-black text-indigo-400 uppercase tracking-[0.3em] animate-pulse pointer-events-none glow-text">
                         CHẠM ĐỂ MỞ MẠNG LƯỚI
                     </div>
 
@@ -249,9 +250,9 @@ export const StudyView: React.FC<StudyViewProps> = ({
                     {isKanjiMode && vocab.kj !== '-' && (
                         <button 
                             onClick={(e) => { e.stopPropagation(); handleExternalSearch(); }}
-                            className="absolute bottom-4 right-4 w-8 h-8 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center text-slate-400 hover:text-indigo-400 transition"
+                            className="absolute bottom-4 right-4 w-10 h-10 bg-indigo-500/10 hover:bg-indigo-500/30 border border-indigo-500/30 rounded-xl flex items-center justify-center text-indigo-400 hover:text-white transition shadow-[0_0_15px_rgba(99,102,241,0.2)]"
                         >
-                            <i className="fas fa-search-plus text-xs"></i>
+                            <i className="fas fa-search-plus text-sm"></i>
                         </button>
                     )}
                 </div>
@@ -259,10 +260,10 @@ export const StudyView: React.FC<StudyViewProps> = ({
                 {/* MIDDLE: READING & MEANING */}
                 <div className="shrink-0 flex flex-col gap-3">
                     {/* READING */}
-                    <div className="h-16 rounded-2xl border border-emerald-500/30 bg-[#020617] relative overflow-hidden flex items-center px-4 shadow-[0_0_15px_rgba(16,185,129,0.05)]">
-                        <div className="flex-1 overflow-hidden flex items-baseline gap-3">
-                            <div className="text-2xl font-black text-emerald-300 truncate">{vocab.ka}</div>
-                            <div className="text-[10px] font-black text-emerald-700/80 uppercase tracking-widest font-mono border border-emerald-900/50 px-1.5 py-0.5 rounded bg-emerald-950/30 truncate">
+                    <div className="h-16 rounded-2xl border-2 border-emerald-500 bg-slate-900/20 backdrop-blur-md relative overflow-hidden flex items-center px-4 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+                        <div className="flex-1 overflow-hidden flex items-baseline gap-3 relative z-10">
+                            <div className="text-2xl font-black text-emerald-400 truncate drop-shadow-md">{vocab.ka}</div>
+                            <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest font-mono border border-white px-2 py-0.5 rounded bg-black truncate shadow-sm">
                                 {vocab.ro}
                             </div>
                         </div>
@@ -271,21 +272,21 @@ export const StudyView: React.FC<StudyViewProps> = ({
                     {/* HÁN VIỆT & MEANING */}
                     <div className="flex gap-3 h-32">
                         {/* HÁN VIỆT */}
-                        <div className="w-1/3 rounded-2xl border border-pink-500/30 bg-[#0f0518] p-3 flex flex-col justify-center relative shadow-[0_0_15px_rgba(236,72,153,0.05)] overflow-hidden">
-                            <span className="text-[8px] font-black text-pink-500 uppercase tracking-widest mb-1">HÁN VIỆT</span>
-                            <div className="text-sm md:text-base font-black text-white uppercase leading-snug line-clamp-3" title={vocab.hv}>
+                        <div className="w-1/3 rounded-2xl border-2 border-pink-500 bg-slate-900/20 backdrop-blur-md p-3 flex flex-col justify-center relative shadow-[0_0_20px_rgba(236,72,153,0.2)] overflow-hidden">
+                            <span className="text-[8px] font-black text-pink-400 uppercase tracking-widest mb-1 glow-text">HÁN VIỆT</span>
+                            <div className="text-sm md:text-base font-black text-white uppercase leading-snug line-clamp-3 drop-shadow-md" title={vocab.hv}>
                                 {vocab.hv}
                             </div>
                         </div>
 
                         {/* MEANING */}
-                        <div className="flex-1 rounded-2xl border border-slate-700 bg-[#0B1120] p-3 flex flex-col justify-center relative overflow-hidden">
+                        <div className="flex-1 rounded-2xl border-2 border-sky-500 bg-slate-900/20 backdrop-blur-md p-3 flex flex-col justify-center relative overflow-hidden shadow-[0_0_20px_rgba(14,165,233,0.2)]">
                             <div className="flex justify-between items-center mb-1">
-                                <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Ý NGHĨA</span>
-                                {vocab.en && <span className="text-[8px] font-black text-sky-500 uppercase tracking-widest border border-sky-900/50 px-1.5 py-0.5 rounded bg-sky-950/30 max-w-[50%] truncate">{vocab.en}</span>}
+                                <span className="text-[8px] font-black text-sky-400 uppercase tracking-widest glow-text">Ý NGHĨA</span>
+                                {vocab.en && <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest border border-white px-2 py-0.5 rounded bg-black max-w-[50%] truncate shadow-sm">{vocab.en}</span>}
                             </div>
                             <div className="overflow-y-auto custom-scrollbar">
-                                <div className="text-lg font-black text-white leading-snug">{vocab.mean}</div>
+                                <div className="text-lg font-black text-white leading-snug drop-shadow-md">{vocab.mean}</div>
                             </div>
                         </div>
                     </div>
@@ -293,14 +294,14 @@ export const StudyView: React.FC<StudyViewProps> = ({
             </div>
 
             {/* 3. Footer Slider */}
-            <div className="h-14 bg-slate-950 border-t border-white/5 flex items-center px-6 gap-6 shrink-0 z-20">
-                <button onClick={handlePrev} className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition active:scale-95">
+            <div className="h-14 bg-slate-950 border-t border-white/10 flex items-center px-6 gap-6 shrink-0 z-20">
+                <button onClick={handlePrev} className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-white hover:border-indigo-500 hover:bg-indigo-900/50 flex items-center justify-center transition active:scale-95 shadow-lg">
                     <i className="fas fa-chevron-left"></i>
                 </button>
-                <div className="flex-1 h-1.5 bg-slate-900 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-indigo-500 to-emerald-500 transition-all duration-300" style={{ width: `${((index + 1) / total) * 100}%` }}></div>
+                <div className="flex-1 h-2 bg-slate-900 rounded-full overflow-hidden border border-white/5 shadow-inner">
+                    <div className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 transition-all duration-300 shadow-[0_0_10px_rgba(99,102,241,0.5)]" style={{ width: `${((index + 1) / total) * 100}%` }}></div>
                 </div>
-                <button onClick={handleNext} className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition active:scale-95">
+                <button onClick={handleNext} className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-white hover:border-indigo-500 hover:bg-indigo-900/50 flex items-center justify-center transition active:scale-95 shadow-lg">
                     <i className="fas fa-chevron-right"></i>
                 </button>
             </div>

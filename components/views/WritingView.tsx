@@ -84,6 +84,30 @@ export const WritingView: React.FC<WritingViewProps> = ({
         }
     }, [timeLeft, checked, timerSettings.duration]);
 
+    const [showControls, setShowControls] = useState(true);
+    const controlsTimeoutRef = useRef<any>(null);
+
+    const resetControlsTimeout = () => {
+        setShowControls(true);
+        if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+        controlsTimeoutRef.current = setTimeout(() => {
+            setShowControls(false);
+        }, 2000);
+    };
+
+    useEffect(() => {
+        window.addEventListener('mousemove', resetControlsTimeout);
+        window.addEventListener('touchstart', resetControlsTimeout);
+        window.addEventListener('click', resetControlsTimeout);
+        resetControlsTimeout();
+        return () => {
+            window.removeEventListener('mousemove', resetControlsTimeout);
+            window.removeEventListener('touchstart', resetControlsTimeout);
+            window.removeEventListener('click', resetControlsTimeout);
+            if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+        };
+    }, []);
+
     const initCanvas = () => {
         Object.values(canvasRefs).forEach(ref => {
             const cv = ref.current;
@@ -129,21 +153,16 @@ export const WritingView: React.FC<WritingViewProps> = ({
         });
     }, [brushStyle, inkColor]);
 
-    const getPos = (e: React.MouseEvent | React.TouchEvent, cv: HTMLCanvasElement) => {
+    const getPos = (e: React.PointerEvent<HTMLCanvasElement>, cv: HTMLCanvasElement) => {
         const rect = cv.getBoundingClientRect();
-        let clientX, clientY;
-        if ('touches' in e) {
-            clientX = e.touches[0].clientX;
-            clientY = e.touches[0].clientY;
-        } else {
-            clientX = (e as React.MouseEvent).clientX;
-            clientY = (e as React.MouseEvent).clientY;
-        }
-        return { x: clientX - rect.left, y: clientY - rect.top };
+        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
     };
 
-    const startDrawing = (e: React.MouseEvent | React.TouchEvent, key: 'kanji' | 'hira') => {
-        if (e.cancelable) e.preventDefault();
+    const startDrawing = (e: React.PointerEvent<HTMLCanvasElement>, key: 'kanji' | 'hira') => {
+        // Prevent default touch actions like scrolling
+        e.preventDefault();
+        e.currentTarget.setPointerCapture(e.pointerId);
+        
         if (checked || isTimeOut) return;
         isDrawing.current = true;
         const cv = canvasRefs[key].current;
@@ -153,8 +172,8 @@ export const WritingView: React.FC<WritingViewProps> = ({
         if (ctx) { ctx.beginPath(); ctx.moveTo(x, y); }
     };
 
-    const draw = (e: React.MouseEvent | React.TouchEvent, key: 'kanji' | 'hira') => {
-        if (e.cancelable) e.preventDefault();
+    const draw = (e: React.PointerEvent<HTMLCanvasElement>, key: 'kanji' | 'hira') => {
+        e.preventDefault();
         if (!isDrawing.current || checked || isTimeOut) return;
         const cv = canvasRefs[key].current;
         if (!cv) return;
@@ -163,7 +182,15 @@ export const WritingView: React.FC<WritingViewProps> = ({
         if (ctx) { ctx.lineTo(x, y); ctx.stroke(); }
     };
 
-    const stopDrawing = () => { isDrawing.current = false; };
+    const stopDrawing = (e: React.PointerEvent<HTMLCanvasElement>) => {
+        e.preventDefault();
+        isDrawing.current = false;
+        try {
+            e.currentTarget.releasePointerCapture(e.pointerId);
+        } catch (err) {
+            // Ignore error if pointer capture was lost
+        }
+    };
 
     const handleReveal = () => {
         setChecked(true);
@@ -196,76 +223,86 @@ export const WritingView: React.FC<WritingViewProps> = ({
             </div>
 
             <div className="flex-1 flex flex-col w-full max-w-4xl mx-auto h-full relative z-10">
-                <div className="flex-none h-14 md:h-20 px-3 md:px-6 bg-slate-900/50 backdrop-blur border-b border-white/10 flex items-center justify-between z-20">
-                <div className="flex items-center gap-2 md:gap-4">
-                    <div className="flex flex-col">
-                        <div className="text-[8px] md:text-[9px] font-black text-slate-500 uppercase tracking-widest flex justify-between w-24 md:w-32 mb-1">
-                            <span>Tiến độ</span>
-                            <span>{index + 1} / {total}</span>
+                <div className="flex-none px-3 md:px-6 py-2 bg-slate-950/40 backdrop-blur-md border-b border-indigo-500/30 flex flex-col gap-2 z-20 shadow-lg">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 md:gap-4">
+                            <div className="flex flex-col">
+                                <div className="text-[8px] md:text-[9px] font-black text-indigo-300 uppercase tracking-widest flex justify-between w-24 md:w-32 mb-1">
+                                    <span>Tiến độ</span>
+                                    <span>{index + 1} / {total}</span>
+                                </div>
+                                <div className="h-1.5 w-24 md:w-32 bg-slate-800 rounded-full overflow-hidden border border-white/10 shadow-inner">
+                                    <div className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all duration-300 shadow-[0_0_10px_rgba(168,85,247,0.5)]" style={{ width: `${progressPercent}%` }}></div>
+                                </div>
+                            </div>
+                            {lessonId && (
+                                <div className="hidden md:block text-[9px] font-black uppercase text-indigo-300 tracking-widest border border-indigo-500/50 px-2 py-1 rounded bg-indigo-900/40 shadow-[0_0_10px_rgba(99,102,241,0.2)]">
+                                    {lessonId === 'SRS' ? 'ÔN TẬP' : `BÀI ${lessonId}`}
+                                </div>
+                            )}
                         </div>
-                        <div className="h-1.5 w-24 md:w-32 bg-slate-800 rounded-full overflow-hidden border border-white/5">
-                            <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-300" style={{ width: `${progressPercent}%` }}></div>
+                        
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1 bg-orange-950/50 border border-orange-500/30 px-3 py-1 rounded-full shadow-[0_0_15px_rgba(249,115,22,0.2)]">
+                                <i className="fas fa-fire text-orange-500 animate-pulse drop-shadow-[0_0_5px_rgba(249,115,22,0.8)]"></i>
+                                <span className="text-sm font-black text-orange-400">{points}</span>
+                            </div>
+                            <button onClick={() => setShowSettings(true)} className={`px-2 py-1 md:px-3 md:py-1.5 rounded-xl border-2 font-black text-[10px] md:text-sm font-mono tracking-widest flex items-center gap-1 md:gap-2 transition shadow-md ${isTimeOut ? 'bg-rose-950 border-rose-500 text-rose-500 animate-pulse' : 'bg-slate-800 border-slate-600 text-slate-400 hover:border-indigo-500 hover:text-white'}`}>
+                                {timerSettings.duration > 0 ? (
+                                    <><i className="fas fa-clock text-[8px] md:text-xs"></i>{Math.floor(timeLeft / 60).toString().padStart(2, '0')}:{Math.floor(timeLeft % 60).toString().padStart(2, '0')}</>
+                                ) : ( <><i className="fas fa-infinity text-[8px] md:text-xs"></i> --:--</> )}
+                            </button>
                         </div>
                     </div>
-                    {lessonId && (
-                        <div className="hidden md:block text-[9px] font-black uppercase text-indigo-400 tracking-widest border border-indigo-500/30 px-2 py-1 rounded bg-indigo-900/20">
-                            {lessonId === 'SRS' ? 'ÔN TẬP' : `BÀI ${lessonId}`}
-                        </div>
-                    )}
-                </div>
-                <div className="flex flex-col items-center">
-                    <h2 className="text-lg md:text-2xl font-black uppercase tracking-widest text-white truncate max-w-[120px] md:max-w-md text-center">{displayMean}</h2>
-                    <div className="text-[10px] md:text-xs font-black text-emerald-500">Điểm: {points}</div>
-                </div>
-                <div className="flex items-center gap-2 md:gap-3">
-                    <button onClick={() => setShowSettings(true)} className={`px-2 py-1 md:px-3 md:py-1.5 rounded-xl border-2 font-black text-[10px] md:text-sm font-mono tracking-widest flex items-center gap-1 md:gap-2 transition ${isTimeOut ? 'bg-rose-900 border-rose-500 text-rose-500 animate-pulse' : 'bg-black/40 border-slate-700 text-slate-300 hover:border-indigo-500'}`}>
-                        {timerSettings.duration > 0 ? (
-                            <><i className="fas fa-clock text-[8px] md:text-xs"></i>{Math.floor(timeLeft / 60).toString().padStart(2, '0')}:{Math.floor(timeLeft % 60).toString().padStart(2, '0')}</>
-                        ) : ( <><i className="fas fa-infinity text-[8px] md:text-xs"></i> --:--</> )}
-                    </button>
-                </div>
-            </div>
-
-            <div ref={containerRef} className="flex-1 p-2 md:p-4 w-full h-full flex flex-col md:flex-row gap-2 md:gap-4 min-h-0 relative z-10">
-                <div className={`flex-1 relative rounded-2xl border-[3px] bg-[#0B1120] overflow-hidden group transition-colors duration-300 ${checked ? 'border-emerald-500/80 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'border-indigo-500/30'} ${showGrid ? 'drawing-grid' : ''}`}>
-                    <span className="absolute top-2 left-3 md:top-3 md:left-4 text-[10px] md:text-xs font-black text-indigo-500/40 pointer-events-none z-0 tracking-[0.2em]">KANJI / HÁN TỰ</span>
-                    {(showGhost || checked) && (
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
-                             <div className={`font-serif text-center leading-tight transition-all duration-500 ${checked ? 'text-emerald-400 opacity-80' : 'text-slate-600 opacity-20'}`} style={{ fontSize: '15vh' }}>{displayKanji}</div>
-                        </div>
-                    )}
-                    <canvas ref={canvasRefs.kanji} onMouseDown={(e) => startDrawing(e, 'kanji')} onMouseMove={(e) => draw(e, 'kanji')} onMouseUp={stopDrawing} onMouseLeave={stopDrawing} onTouchStart={(e) => startDrawing(e, 'kanji')} onTouchMove={(e) => draw(e, 'kanji')} onTouchEnd={stopDrawing} className="absolute inset-0 cursor-crosshair z-10 touch-none" />
-                </div>
-
-                <div className={`flex-1 relative rounded-2xl border-[3px] bg-[#0B1120] overflow-hidden transition-colors duration-300 ${checked ? 'border-emerald-500/80 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'border-fuchsia-500/30'} ${showGrid ? 'drawing-grid' : ''}`}>
-                    <span className="absolute top-2 left-3 md:top-3 md:left-4 text-[10px] md:text-xs font-black text-fuchsia-500/40 pointer-events-none z-0 tracking-[0.2em]">READING / CÁCH ĐỌC</span>
-                     {(showGhost || checked) && (
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
-                             <div className={`font-serif text-center leading-tight transition-all duration-500 ${checked ? 'text-emerald-400 opacity-80' : 'text-slate-600 opacity-20'}`} style={{ fontSize: '15vh' }}>{vocab.ka}</div>
-                        </div>
-                    )}
-                    <canvas ref={canvasRefs.hira} onMouseDown={(e) => startDrawing(e, 'hira')} onMouseMove={(e) => draw(e, 'hira')} onMouseUp={stopDrawing} onMouseLeave={stopDrawing} onTouchStart={(e) => startDrawing(e, 'hira')} onTouchMove={(e) => draw(e, 'hira')} onTouchEnd={stopDrawing} className="absolute inset-0 cursor-crosshair z-10 touch-none" />
-                </div>
-            </div>
-
-            <div className="flex-none p-2 md:p-4 bg-slate-900/50 backdrop-blur border-t border-white/10 z-20">
-                <div className="flex items-center justify-between gap-2 md:gap-4 h-14 md:h-16">
-                    <button onClick={onPrev} className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-slate-800 border-2 border-slate-600 text-slate-400 hover:text-white transition flex items-center justify-center"><i className="fas fa-chevron-left"></i></button>
-                    <div className="flex gap-2 items-center">
-                         <button onClick={() => handleClear(false)} className="w-10 h-10 md:w-12 md:h-12 rounded-xl border-2 border-rose-500/30 text-rose-500 hover:bg-rose-900/20 hover:border-rose-500 flex items-center justify-center transition"><i className="fas fa-trash-alt"></i></button>
+                    
+                    {/* Full Meaning Display */}
+                    <div className="w-full bg-slate-900/20 backdrop-blur-sm border border-indigo-500/40 rounded-xl p-2 md:p-3 flex items-center justify-center min-h-[3rem] md:min-h-[4rem] shadow-[0_0_15px_rgba(99,102,241,0.1)]">
+                        <h2 className="text-sm md:text-lg font-black text-white text-center leading-tight drop-shadow-md">{displayMean}</h2>
                     </div>
-                    <div className="flex flex-1 justify-end gap-2 md:gap-3">
-                        {!checked ? (
-                            <button onClick={handleReveal} className={`flex-1 rounded-xl font-black text-xs md:text-sm uppercase tracking-[0.2em] shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 px-4 ${isTimeOut ? 'bg-amber-600 text-white animate-bounce' : 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white'}`}><i className={`fas ${isTimeOut ? 'fa-eye' : 'fa-search'}`}></i> <span className="hidden sm:inline">{isTimeOut ? 'ĐÁP ÁN' : 'KIỂM TRA'}</span></button>
-                        ) : (
-                            <div className="flex-1 flex gap-2 animate-slide-up min-w-[150px] md:min-w-[200px]">
-                                <button onClick={() => handleGrade(false)} className="flex-1 bg-rose-950 border-2 border-rose-500 text-rose-500 rounded-xl font-black uppercase text-xs md:text-sm flex items-center justify-center gap-1 md:gap-2 h-12 md:h-14"><i className="fas fa-times text-lg"></i> SAI</button>
-                                <button onClick={() => handleGrade(true)} className="flex-1 bg-emerald-950 border-2 border-emerald-500 text-emerald-500 rounded-xl font-black uppercase text-xs md:text-sm flex items-center justify-center gap-1 md:gap-2 h-12 md:h-14"><i className="fas fa-check text-lg"></i> ĐÚNG</button>
+                </div>
+
+                <div ref={containerRef} className="flex-1 p-2 md:p-4 w-full h-full flex flex-col md:flex-row gap-2 md:gap-4 min-h-0 relative z-10">
+                    <div className={`flex-1 relative rounded-2xl border-[3px] bg-slate-950/30 backdrop-blur-sm overflow-hidden group transition-colors duration-300 ${checked ? 'border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.3)]' : 'border-indigo-500/60 shadow-[0_0_20px_rgba(99,102,241,0.2)]'} ${showGrid ? 'drawing-grid' : ''}`}>
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diagmonds-light.png')] opacity-5 mix-blend-overlay pointer-events-none"></div>
+                        <span className="absolute top-2 left-3 md:top-3 md:left-4 text-[10px] md:text-xs font-black text-indigo-500/60 pointer-events-none z-10 tracking-[0.2em] glow-text">KANJI / HÁN TỰ</span>
+                        {(showGhost || checked) && (
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
+                                 <div className={`font-serif text-center leading-tight transition-all duration-500 ${checked ? 'text-emerald-400 opacity-80 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'text-slate-600 opacity-20'}`} style={{ fontSize: 'min(10vh, 4rem)' }}>{displayKanji}</div>
                             </div>
                         )}
+                        <canvas ref={canvasRefs.kanji} onPointerDown={(e) => startDrawing(e, 'kanji')} onPointerMove={(e) => draw(e, 'kanji')} onPointerUp={stopDrawing} onPointerLeave={stopDrawing} className="absolute inset-0 cursor-crosshair z-10 touch-none" style={{ touchAction: 'none' }} />
+                    </div>
+
+                    <div className={`flex-1 relative rounded-2xl border-[3px] bg-slate-950/30 backdrop-blur-sm overflow-hidden transition-colors duration-300 ${checked ? 'border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.3)]' : 'border-fuchsia-500/60 shadow-[0_0_20px_rgba(217,70,239,0.2)]'} ${showGrid ? 'drawing-grid' : ''}`}>
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diagmonds-light.png')] opacity-5 mix-blend-overlay pointer-events-none"></div>
+                        <span className="absolute top-2 left-3 md:top-3 md:left-4 text-[10px] md:text-xs font-black text-fuchsia-500/60 pointer-events-none z-10 tracking-[0.2em] glow-text">READING / CÁCH ĐỌC</span>
+                         {(showGhost || checked) && (
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
+                                 <div className={`font-serif text-center leading-tight transition-all duration-500 ${checked ? 'text-emerald-400 opacity-80 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'text-slate-600 opacity-20'}`} style={{ fontSize: 'min(10vh, 4rem)' }}>{vocab.ka}</div>
+                            </div>
+                        )}
+                        <canvas ref={canvasRefs.hira} onPointerDown={(e) => startDrawing(e, 'hira')} onPointerMove={(e) => draw(e, 'hira')} onPointerUp={stopDrawing} onPointerLeave={stopDrawing} className="absolute inset-0 cursor-crosshair z-10 touch-none" style={{ touchAction: 'none' }} />
                     </div>
                 </div>
-            </div>
+
+                <div className="flex-none p-2 md:p-4 bg-slate-950/40 backdrop-blur-md border-t border-indigo-500/30 z-20 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+                    <div className="flex items-center justify-between gap-2 md:gap-4 h-14 md:h-16">
+                        <button onClick={onPrev} className={`w-12 h-12 md:w-14 md:h-14 rounded-xl bg-slate-800 border-2 border-slate-600 text-slate-400 hover:text-white hover:border-indigo-500 hover:bg-indigo-900/50 flex items-center justify-center shadow-lg active:scale-95 transition-all duration-500 ${showControls ? 'opacity-100' : 'opacity-30 hover:opacity-100'}`}><i className="fas fa-chevron-left"></i></button>
+                        <div className="flex gap-2 items-center">
+                             <button onClick={() => handleClear(false)} className={`w-12 h-12 md:w-14 md:h-14 rounded-xl border-2 border-rose-500/30 text-rose-500 hover:bg-rose-900/20 hover:border-rose-500 flex items-center justify-center transition-all duration-500 shadow-lg active:scale-95 ${showControls ? 'opacity-100' : 'opacity-30 hover:opacity-100'}`}><i className="fas fa-trash-alt"></i></button>
+                        </div>
+                        <div className="flex flex-1 justify-end gap-2 md:gap-3">
+                            {!checked ? (
+                                <button onClick={handleReveal} className={`flex-1 rounded-xl font-black text-xs md:text-sm uppercase tracking-[0.2em] shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 px-4 h-12 md:h-14 ${isTimeOut ? 'bg-amber-600 text-white animate-bounce shadow-[0_0_20px_rgba(245,158,11,0.5)]' : 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white hover:from-indigo-500 hover:to-blue-500 shadow-[0_0_20px_rgba(99,102,241,0.4)]'}`}><i className={`fas ${isTimeOut ? 'fa-eye' : 'fa-search'}`}></i> <span className="hidden sm:inline">{isTimeOut ? 'ĐÁP ÁN' : 'KIỂM TRA'}</span></button>
+                            ) : (
+                                <div className="flex-1 flex gap-2 animate-slide-up min-w-[150px] md:min-w-[200px]">
+                                    <button onClick={() => handleGrade(false)} className="flex-1 bg-rose-950 border-2 border-rose-500 text-rose-500 hover:bg-rose-900 hover:text-white hover:border-white transition rounded-xl font-black uppercase text-xs md:text-sm flex items-center justify-center gap-1 md:gap-2 h-12 md:h-14 shadow-[0_0_15px_rgba(225,29,72,0.3)] active:scale-95"><i className="fas fa-times text-lg"></i> SAI</button>
+                                    <button onClick={() => handleGrade(true)} className="flex-1 bg-emerald-950 border-2 border-emerald-500 text-emerald-500 hover:bg-emerald-900 hover:text-white hover:border-white transition rounded-xl font-black uppercase text-xs md:text-sm flex items-center justify-center gap-1 md:gap-2 h-12 md:h-14 shadow-[0_0_15px_rgba(16,185,129,0.3)] active:scale-95"><i className="fas fa-check text-lg"></i> ĐÚNG</button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
             </div>
             
             {showSettings && (
