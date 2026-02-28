@@ -254,9 +254,15 @@ function App() {
                  });
             } else {
                  // Remove from queue
+                 if (srsQueue.length === 1) {
+                     showToast("Bạn đã hoàn thành danh sách ôn tập!", "success");
+                 }
                  setSrsQueue(prev => prev.slice(1));
             }
         } else {
+            if (currentIndex + 1 >= activeVocab.length) {
+                showToast("Bạn đã hoàn thành danh sách!", "success");
+            }
             updateIndex(currentIndex + 1);
         }
     };

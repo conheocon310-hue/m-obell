@@ -243,7 +243,7 @@ const AnkiMode: React.FC<ReflexViewProps> = ({ vocab, srsStatus, onNext, current
                         
                         <div className="w-full h-full flex flex-col items-center justify-center overflow-hidden relative z-10" style={{ containerType: 'inline-size' }}>
                             <div 
-                                className="font-sans font-black text-white drop-shadow-2xl leading-tight whitespace-normal break-words text-center flex flex-col items-center justify-center h-full px-4" 
+                                className="font-sans font-medium text-white drop-shadow-2xl leading-tight whitespace-normal break-words text-center flex flex-col items-center justify-center h-full px-4" 
                                 style={{ 
                                     fontSize, 
                                     width: '100%' 
