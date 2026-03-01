@@ -84,7 +84,7 @@ const SRSButton: React.FC<SRSButtonProps> = ({ label, time, color, onClick, hotk
     );
 };
 
-const AnkiMode: React.FC<ReflexViewProps> = ({ vocab, srsStatus, onNext, currentIndex, total, db, lessonId, mode, allVocab }) => {
+const AnkiMode: React.FC<ReflexViewProps> = ({ vocab, srsStatus, onNext, currentIndex, total, db, lessonId, allVocab }) => {
     const [isFlipped, setIsFlipped] = useState(false);
     const [hintUsed, setHintUsed] = useState(false);
     const [pressedKey, setPressedKey] = useState<string | null>(null); 

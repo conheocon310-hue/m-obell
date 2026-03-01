@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Vocab, AppDatabase, CramSession } from '../../types';
 import { playSfx } from '../../services/audioService';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 
 interface CramModeViewProps {
     vocabList: Vocab[]; // This is the "fresh" list from App (already sorted/shuffled by App)
@@ -371,31 +371,6 @@ export const CramModeView: React.FC<CramModeViewProps> = ({ vocabList, lessonId,
 
     // --- EXIT LOGIC ---
     
-    const tryExit = () => {
-        if (!session) return;
-        
-        // EXIT FILTER
-        const activeItems = [...session.buffer, ...session.queue].filter(v => {
-            const h = session.progressMap[v.id] || 0;
-            return h > 0 && h < HITS_TO_GRADUATE;
-        });
-
-        if (activeItems.length > 0) {
-            // Enter Exit Test
-            updateSession({
-                ...session,
-                phase: 'exit_test',
-                testQueue: activeItems.sort(() => Math.random() - 0.5),
-                mistakesInExitTest: 0
-            });
-            setCurrentCardIndex(0);
-            alert(`BẠN ĐANG CÓ ${activeItems.length} TỪ ĐANG HỌC DỞ (CÓ VẠCH XANH).\nHOÀN THÀNH BÀI KIỂM TRA THANH LỌC ĐỂ THOÁT.`);
-        } else {
-            // Safe to exit
-            onClose();
-        }
-    };
-
     // --- RENDER ---
 
     if (!session) return null;

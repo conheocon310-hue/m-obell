@@ -88,7 +88,7 @@ export interface AppDatabase {
     cramSession?: CramSession; // New persistent session
 }
 
-export type ViewName = 'dashboard' | 'lesson-list' | 'data-factory' | 'study' | 'writing' | 'reflex' | 'reflex-selector' | 'blitz-game' | 'cram' | 'settings' | 'rule-explorer' | 'kanji-explorer' | 'kanji-network';
-export type ModeName = 'study' | 'writing' | 'reflex' | 'blitz' | 'cram';
+export type ViewName = 'dashboard' | 'lesson-list' | 'data-factory' | 'study' | 'writing' | 'reflex' | 'reflex-selector' | 'blitz-game' | 'cram' | 'settings' | 'rule-explorer' | 'kanji-explorer' | 'kanji-network' | 'typing';
+export type ModeName = 'study' | 'writing' | 'reflex' | 'blitz' | 'cram' | 'typing';
 
 export const STORAGE_KEY = 'kotoba_master_pro_v13';

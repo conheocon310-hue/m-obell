@@ -38,15 +38,6 @@ export const DataFactoryView: React.FC<DataFactoryProps> = ({ onImport, onClose,
         }
     };
 
-    const insertTemplate = () => {
-        const template = `[
-  { "id": 21, "type": "vocab", "ka": "びょういん", "kj": "病院", "ro": "byouin", "hv": "Bệnh Viện", "mean": "bệnh viện", "on": "-", "kun": "-", "en": "-", "lesson": "1" },
-  { "id": "21.1", "type": "kanji", "ka": "やま.い", "kj": "病", "ro": "byou", "hv": "Bệnh", "mean": "Ốm, bệnh tật", "on": "BYOU", "kun": "yamai", "en": "-", "lesson": "2" },
-  { "id": "21.2", "type": "kanji", "ka": "にわ", "kj": "院", "ro": "in", "hv": "Viện", "mean": "Cái sân, tòa nhà, học viện", "on": "IN", "kun": "niwa", "en": "-" }
-]`;
-        setRawInput(prev => prev + template);
-    };
-
     return (
         <section className="absolute inset-0 p-8 overflow-y-auto custom-scrollbar animate-slide-up bg-black/80 backdrop-blur-md">
             <div className="max-w-4xl mx-auto space-y-6">

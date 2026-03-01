@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { AppDatabase, SRSStatus } from '../types';
 import { playSfx } from '../services/audioService';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, Home, ArrowLeft, Settings, Book, Flame, Layers, CheckCircle } from 'lucide-react';
+import { X, Home, Settings, Flame, Layers, CheckCircle } from 'lucide-react';
 import { getRankByCount } from '../services/storageService';
 
 interface LayoutProps {
@@ -242,9 +242,8 @@ const TimerWidget = () => {
     );
 };
 
-export const Layout: React.FC<LayoutProps> = ({ title, onHome, onBack, onSettings, children, showBack, showHome = true, onOpenRules, db, onCheckIn }) => {
+export const Layout: React.FC<LayoutProps> = ({ title, onHome, onBack, onSettings, children, showBack, showHome = true, db, onCheckIn }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [isTopBarOpen, setIsTopBarOpen] = useState(false);
     const [isBackButtonVisible, setIsBackButtonVisible] = useState(true);
     const [showCheckInModal, setShowCheckInModal] = useState(false);
     const [viewDate, setViewDate] = useState(new Date());
@@ -282,7 +281,7 @@ export const Layout: React.FC<LayoutProps> = ({ title, onHome, onBack, onSetting
     }
 
     useEffect(() => {
-        let timeoutId: NodeJS.Timeout;
+        let timeoutId: any;
 
         const handleActivity = (e: any) => {
             let clientX, clientY;

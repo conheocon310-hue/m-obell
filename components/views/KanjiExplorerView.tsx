@@ -12,7 +12,7 @@ interface KanjiExplorerViewProps {
 
 type FilterType = 'all' | 'mastered' | 'learning';
 
-export const KanjiExplorerView: React.FC<KanjiExplorerViewProps> = ({ db, onClose, onReviewLesson, onReviewDueKanji }) => {
+export const KanjiExplorerView: React.FC<KanjiExplorerViewProps> = ({ db, onReviewLesson, onReviewDueKanji }) => {
     const [expandedLessons, setExpandedLessons] = useState<Set<string>>(new Set());
     const [filter, setFilter] = useState<FilterType>('all');
     const [popupVocab, setPopupVocab] = useState<Vocab | null>(null);
