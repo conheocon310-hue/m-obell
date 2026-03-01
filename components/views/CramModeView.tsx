@@ -78,6 +78,7 @@ export const CramModeView: React.FC<CramModeViewProps> = ({ vocabList, lessonId,
                 buffer: [],
                 progressMap: {},
                 graduatedIds: [],
+                mistakeIds: [],
                 lockStartTime: 0, 
                 lockDuration: 0,
                 phase: 'setup',
@@ -165,16 +166,10 @@ export const CramModeView: React.FC<CramModeViewProps> = ({ vocabList, lessonId,
     const restartSession = () => {
         if (!session) return;
         
-        // Re-use all items from the current session (graduated + queue + buffer + testQueue)
-        // In 'finished' state, everything should be in graduatedIds usually, but let's be safe
-        // Actually, we can just look at graduatedIds if we finished successfully.
-        // But if we want to be robust, we can map graduatedIds back to Vocab objects using vocabList.
-        
         const allIds = new Set([...session.graduatedIds, ...session.queue.map(v => String(v.id)), ...session.buffer.map(v => String(v.id))]);
         const itemsToRestart = vocabList.filter(v => allIds.has(String(v.id)));
         
         if (itemsToRestart.length === 0) {
-            // Fallback to all if something went wrong
             startSession('all'); 
             return;
         }
@@ -192,6 +187,39 @@ export const CramModeView: React.FC<CramModeViewProps> = ({ vocabList, lessonId,
             buffer: initialBuffer,
             progressMap: pMap,
             graduatedIds: [],
+            mistakeIds: [],
+            phase: 'cramming',
+            testQueue: [],
+            mistakesInExitTest: 0
+        });
+        playSfx(1000, 'square', 0.5);
+    };
+
+    const restartMistakes = () => {
+        if (!session || !session.mistakeIds || session.mistakeIds.length === 0) return;
+        
+        const mistakeIdsSet = new Set(session.mistakeIds);
+        const itemsToRestart = vocabList.filter(v => mistakeIdsSet.has(String(v.id)));
+        
+        if (itemsToRestart.length === 0) {
+            startSession('all'); 
+            return;
+        }
+
+        itemsToRestart.sort(() => Math.random() - 0.5);
+
+        const initialQueue = [...itemsToRestart];
+        const initialBuffer = initialQueue.splice(0, BUFFER_SIZE);
+        const pMap: Record<string, number> = {};
+        [...initialQueue, ...initialBuffer].forEach(v => pMap[v.id] = 0);
+
+        updateSession({
+            ...session,
+            queue: initialQueue,
+            buffer: initialBuffer,
+            progressMap: pMap,
+            graduatedIds: [],
+            mistakeIds: [],
             phase: 'cramming',
             testQueue: [],
             mistakesInExitTest: 0
@@ -274,10 +302,11 @@ export const CramModeView: React.FC<CramModeViewProps> = ({ vocabList, lessonId,
             }
 
             // --- CRAMMING LOGIC ---
-            let { buffer, queue, progressMap, graduatedIds } = session;
+            let { buffer, queue, progressMap, graduatedIds, mistakeIds } = session;
             let newBuffer = [...buffer];
             let newQueue = [...queue];
             let newProgress = { ...progressMap };
+            let newMistakeIds = mistakeIds ? [...mistakeIds] : [];
             let nextIndex = currentCardIndex;
 
             if (correct) {
@@ -298,7 +327,7 @@ export const CramModeView: React.FC<CramModeViewProps> = ({ vocabList, lessonId,
                      }
 
                      if (newBuffer.length === 0) {
-                         updateSession({ ...session, phase: 'finished', buffer: [], queue: [], graduatedIds });
+                         updateSession({ ...session, phase: 'finished', buffer: [], queue: [], graduatedIds, mistakeIds: newMistakeIds });
                          return;
                      }
                      
@@ -311,6 +340,9 @@ export const CramModeView: React.FC<CramModeViewProps> = ({ vocabList, lessonId,
             } else {
                 // Wrong -> Jump Rule
                 newProgress[vocab.id] = 0; // Reset hits
+                if (!newMistakeIds.includes(String(vocab.id))) {
+                    newMistakeIds.push(String(vocab.id));
+                }
                 
                 // Remove from buffer
                 newBuffer.splice(currentCardIndex, 1);
@@ -334,7 +366,8 @@ export const CramModeView: React.FC<CramModeViewProps> = ({ vocabList, lessonId,
                 buffer: newBuffer,
                 queue: newQueue,
                 progressMap: newProgress,
-                graduatedIds
+                graduatedIds,
+                mistakeIds: newMistakeIds
             });
             setCurrentCardIndex(nextIndex);
         }, 300);
@@ -421,18 +454,27 @@ export const CramModeView: React.FC<CramModeViewProps> = ({ vocabList, lessonId,
     }
 
     if (session.phase === 'finished') {
+        const mistakesCount = session.mistakeIds?.length || 0;
+        
         return (
-            <div className="fixed inset-0 z-[200] bg-emerald-950/90 flex flex-col items-center justify-center animate-slide-up backdrop-blur-xl">
+            <div className="fixed inset-0 z-[200] bg-emerald-950/90 flex flex-col items-center justify-center animate-slide-up backdrop-blur-xl p-6">
                 <i className="fas fa-trophy text-6xl text-yellow-400 mb-6 animate-bounce"></i>
-                <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter">HOÀN THÀNH</h2>
-                <p className="text-emerald-400 font-bold uppercase tracking-widest mt-2">Bạn đã nuốt trọn {session.graduatedIds.length} từ vựng</p>
+                <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter text-center">HOÀN THÀNH</h2>
+                <p className="text-emerald-400 font-bold uppercase tracking-widest mt-2 text-center">Bạn đã nuốt trọn {session.graduatedIds.length} từ vựng</p>
                 
-                <div className="mt-12 flex flex-col gap-4 w-full max-w-xs">
-                    <button onClick={restartSession} className="w-full py-4 bg-white text-emerald-900 font-black uppercase rounded-full shadow-2xl hover:scale-105 transition flex items-center justify-center gap-2">
-                        <i className="fas fa-rotate-right"></i> Ôn lại danh sách này
+                <div className="mt-12 flex flex-col gap-4 w-full max-w-md">
+                    <button onClick={restartSession} className="w-full py-4 bg-gradient-to-r from-slate-800 to-slate-700 border-2 border-slate-600 rounded-xl text-white font-black uppercase hover:from-slate-700 hover:to-slate-600 hover:border-white transition shadow-lg active:scale-95 group flex items-center justify-center gap-2">
+                        <i className="fas fa-redo-alt text-slate-400 group-hover:text-white transition-colors"></i> Ôn tập lại tất cả (Không lưu SRS)
                     </button>
-                    <button onClick={onClose} className="w-full py-4 bg-emerald-900/50 border-2 border-emerald-500/30 text-emerald-200 font-black uppercase rounded-full hover:bg-emerald-900 hover:text-white transition">
-                        Thoát ra
+                    
+                    {mistakesCount > 0 && (
+                        <button onClick={restartMistakes} className="w-full py-4 bg-gradient-to-r from-amber-900/80 to-orange-900/80 border-2 border-amber-600 rounded-xl text-amber-500 font-black uppercase hover:from-amber-800 hover:to-orange-800 hover:text-white hover:border-white transition shadow-[0_0_20px_rgba(245,158,11,0.3)] active:scale-95 group flex items-center justify-center gap-2">
+                            <i className="fas fa-dumbbell text-amber-600 group-hover:text-white transition-colors"></i> Ôn tập những từ khó ({mistakesCount}) (Không lưu SRS)
+                        </button>
+                    )}
+                    
+                    <button onClick={onClose} className="w-full py-4 bg-slate-800/50 border-2 border-slate-700 text-slate-400 font-black uppercase rounded-xl hover:bg-slate-800 hover:text-white hover:border-slate-500 transition active:scale-95 flex items-center justify-center gap-2 mt-4">
+                        <i className="fas fa-times"></i> Đóng bảng
                     </button>
                 </div>
             </div>

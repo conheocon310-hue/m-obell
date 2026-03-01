@@ -125,7 +125,7 @@ export const BlitzGameView: React.FC<BlitzGameViewProps> = ({ lessonId, vocabLis
 
     useEffect(() => { return () => { if (timerRef.current) clearInterval(timerRef.current); }; }, []);
 
-    const SetupScreen = () => (
+    const renderSetupScreen = () => (
         <div className="flex flex-col items-center justify-center h-full space-y-8 animate-slide-up relative z-20">
             <div className="text-center">
                 <i className="fas fa-bolt text-5xl text-neon-amber mb-4 animate-pulse drop-shadow-[0_0_20px_#ffaa00]"></i>
@@ -168,7 +168,7 @@ export const BlitzGameView: React.FC<BlitzGameViewProps> = ({ lessonId, vocabLis
         </div>
     );
 
-    const GameOverScreen = () => (
+    const renderGameOverScreen = () => (
         <div className="flex flex-col items-center justify-center h-full space-y-6 animate-slide-up relative z-20">
             <div className="text-center">
                 <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Kết quả</div>
@@ -181,8 +181,8 @@ export const BlitzGameView: React.FC<BlitzGameViewProps> = ({ lessonId, vocabLis
         </div>
     );
 
-    if (phase === 'setup') return <div className="absolute inset-0 p-6"><SetupScreen /></div>;
-    if (phase === 'gameover') return <div className="absolute inset-0 p-6"><GameOverScreen /></div>;
+    if (phase === 'setup') return <div className="absolute inset-0 p-6">{renderSetupScreen()}</div>;
+    if (phase === 'gameover') return <div className="absolute inset-0 p-6">{renderGameOverScreen()}</div>;
     if (!currentQuestion) return null;
 
     // Helper to display visual key

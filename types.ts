@@ -56,6 +56,7 @@ export interface CramSession {
     buffer: Vocab[];
     progressMap: Record<string, number>; // itemId -> hits (0-3)
     graduatedIds: string[];
+    mistakeIds?: string[]; // Track words that were marked wrong
     lockStartTime: number; // Timestamp when lock started
     lockDuration: number; // Seconds (default 240)
     phase: 'setup' | 'locked' | 'cramming' | 'exit_test' | 'finished';

@@ -27,7 +27,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
     const [showFavList, setShowFavList] = useState(false);
 
     // List Modal
-    const ListModal = () => (
+    const renderListModal = () => (
         <div 
             className="absolute inset-0 z-[60] bg-slate-950/95 backdrop-blur-xl animate-slide-up flex flex-col"
             onTouchStart={e => e.stopPropagation()}
@@ -165,11 +165,10 @@ export const StudyView: React.FC<StudyViewProps> = ({
     const isKanjiMode = studyType === 'kanji' || vocab.type === 'kanji';
 
     // Dynamic Font Size Logic using Container Queries (cqi)
-    // Formula Reduced: min(MaxPixelSize * 0.7, (70cqi / CharCount))
     const userScale = kanjiSize / 130; 
     const textLength = mainVisual.length;
-    // Reduced base from 350 to 250, cqi from 95 to 70
-    const fontSize = `min(${250 * userScale}px, ${70 / textLength}cqi)`;
+    // Use clamp to ensure font size stays within reasonable bounds on all devices
+    const fontSize = `clamp(2rem, min(${200 * userScale}px, ${80 / textLength}cqi), 180px)`;
 
     return (
         <section 
@@ -213,7 +212,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
                 </div>
             </div>
 
-            {showFavList && <ListModal />}
+            {showFavList && renderListModal()}
 
             {/* 2. Main Content - Vertical Stack for Phone View */}
             <div className={`flex-1 p-4 overflow-hidden z-10 flex flex-col gap-4 transition-all ease-out w-full max-w-4xl mx-auto ${getAnimationClass()}`}>
@@ -262,8 +261,8 @@ export const StudyView: React.FC<StudyViewProps> = ({
                     {/* READING */}
                     <div className="h-16 rounded-2xl border-2 border-emerald-500 bg-slate-900/20 backdrop-blur-md relative overflow-hidden flex items-center px-4 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
                         <div className="flex-1 overflow-hidden flex items-baseline gap-3 relative z-10">
-                            <div className="text-2xl font-black text-emerald-400 truncate drop-shadow-md">{vocab.ka}</div>
-                            <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest font-mono border border-white px-2 py-0.5 rounded bg-black truncate shadow-sm">
+                            <div className="text-xl sm:text-2xl font-black text-emerald-400 truncate drop-shadow-md">{vocab.ka}</div>
+                            <div className="text-[10px] sm:text-xs font-black text-emerald-500 uppercase tracking-widest font-mono border border-white px-2 py-0.5 rounded bg-black truncate shadow-sm">
                                 {vocab.ro}
                             </div>
                         </div>
@@ -273,8 +272,8 @@ export const StudyView: React.FC<StudyViewProps> = ({
                     <div className="flex gap-3 h-32">
                         {/* HÁN VIỆT */}
                         <div className="w-1/3 rounded-2xl border-2 border-pink-500 bg-slate-900/20 backdrop-blur-md p-3 flex flex-col justify-center relative shadow-[0_0_20px_rgba(236,72,153,0.2)] overflow-hidden">
-                            <span className="text-[8px] font-black text-pink-400 uppercase tracking-widest mb-1 glow-text">HÁN VIỆT</span>
-                            <div className="text-sm md:text-base font-black text-white uppercase leading-snug line-clamp-3 drop-shadow-md" title={vocab.hv}>
+                            <span className="text-[8px] sm:text-[10px] font-black text-pink-400 uppercase tracking-widest mb-1 glow-text">HÁN VIỆT</span>
+                            <div className="text-xs sm:text-sm md:text-base font-black text-white uppercase leading-snug line-clamp-3 drop-shadow-md" title={vocab.hv}>
                                 {vocab.hv}
                             </div>
                         </div>
@@ -282,11 +281,11 @@ export const StudyView: React.FC<StudyViewProps> = ({
                         {/* MEANING */}
                         <div className="flex-1 rounded-2xl border-2 border-sky-500 bg-slate-900/20 backdrop-blur-md p-3 flex flex-col justify-center relative overflow-hidden shadow-[0_0_20px_rgba(14,165,233,0.2)]">
                             <div className="flex justify-between items-center mb-1">
-                                <span className="text-[8px] font-black text-sky-400 uppercase tracking-widest glow-text">Ý NGHĨA</span>
+                                <span className="text-[8px] sm:text-[10px] font-black text-sky-400 uppercase tracking-widest glow-text">Ý NGHĨA</span>
                                 {vocab.en && <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest border border-white px-2 py-0.5 rounded bg-black max-w-[50%] truncate shadow-sm">{vocab.en}</span>}
                             </div>
                             <div className="overflow-y-auto custom-scrollbar">
-                                <div className="text-lg font-black text-white leading-snug drop-shadow-md">{vocab.mean}</div>
+                                <div className="text-base sm:text-lg font-black text-white leading-snug drop-shadow-md">{vocab.mean}</div>
                             </div>
                         </div>
                     </div>

@@ -59,8 +59,7 @@ export const DataFactoryView: React.FC<DataFactoryProps> = ({ onImport, onClose,
                                 id="autoDetect"
                             />
                             <label htmlFor="autoDetect" className="cursor-pointer">
-                                <div className="text-xs font-bold text-white uppercase">Chế độ nạp nhiều bài (Auto Detect)</div>
-                                <div className="text-[9px] text-slate-400 italic">Sử dụng thuộc tính 'lesson' trong file JSON thay vì ghi đè</div>
+                                <div className="text-xs font-bold text-white uppercase">Nạp tự động</div>
                             </label>
                         </div>
 
@@ -75,25 +74,16 @@ export const DataFactoryView: React.FC<DataFactoryProps> = ({ onImport, onClose,
                                     onChange={(e) => setLessonNum(e.target.value)}
                                     className="w-24 font-black text-lg bg-[#020617] text-[#f8fafc] border-[2.5px] border-[#1e293b] p-3 rounded-xl outline-none focus:border-indigo-500 focus:shadow-[0_0_15px_rgba(99,102,241,0.2)] text-center"
                                 />
-                                <div className="text-[10px] text-slate-500 italic">
-                                    * Tất cả từ vựng được nạp sẽ bị gán vào bài này.
-                                </div>
                             </div>
                         )}
                     </div>
 
                     <div className="space-y-2 relative">
-                        <div className="flex justify-between items-end">
-                            <label className="text-[9px] font-black text-indigo-400 uppercase tracking-widest">Dán dữ liệu (JSON Object/Array)</label>
-                        </div>
-                        <div className="text-[10px] text-white/70 mb-2 font-mono space-y-1">
-                            <div>Format chuẩn (JSON 11 trường): <span className="text-indigo-400">id, type, ka, kj, ro, hv, mean, on, kun, en</span></div>
-                        </div>
                         <textarea 
                             value={rawInput}
                             onChange={(e) => setRawInput(e.target.value)}
                             className="w-full h-72 text-[12px] font-mono leading-relaxed bg-[#020617] text-[#f8fafc] border-[2.5px] border-[#1e293b] p-4 rounded-xl outline-none focus:border-indigo-500 focus:shadow-[0_0_15px_rgba(99,102,241,0.2)]" 
-                            placeholder='[ { "id": 21, "type": "vocab", ... } ]'
+                            placeholder='Dán vào đây'
                         ></textarea>
                     </div>
 

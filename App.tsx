@@ -341,7 +341,7 @@ function App() {
     };
 
     // ... Fireworks component ...
-    const Fireworks = () => (
+    const renderFireworks = () => (
         <div className="absolute inset-0 z-[200] pointer-events-none flex items-center justify-center overflow-hidden">
             {[...Array(30)].map((_, i) => (
                 <div key={i} className="firework bg-indigo-500" style={{ left: `${Math.random()*100}%`, top: `${Math.random()*100}%`, animation: `ping-slow ${0.5 + Math.random()}s infinite` }}></div>
@@ -357,7 +357,7 @@ function App() {
     const getTitle = () => "KOTOBA MASTER PRO";
 
     // --- COMPLETION SCREEN COMPONENT ---
-    const CompletionScreen = () => {
+    const renderCompletionScreen = () => {
         const mistakesCount = sessionMistakes.size;
 
         return (
@@ -413,7 +413,7 @@ function App() {
     };
 
     // --- RESET SELECTOR MODAL ---
-    const ResetSelectorModal = () => (
+    const renderResetSelectorModal = () => (
         <div className="absolute inset-0 z-[70] bg-black/90 backdrop-blur-md flex items-center justify-center p-6 animate-slide-up" onClick={() => setShowResetSelector(false)}>
             <div className="bg-slate-900 border-[3px] border-indigo-500 rounded-3xl p-8 max-w-sm w-full shadow-[0_0_50px_rgba(99,102,241,0.3)] space-y-6" onClick={e => e.stopPropagation()}>
                 <div className="text-center">
@@ -451,7 +451,7 @@ function App() {
     );
     
     // --- EXPORT SELECTOR MODAL ---
-    const ExportSelectorModal = () => (
+    const renderExportSelectorModal = () => (
          <div className="absolute inset-0 z-[70] bg-black/90 backdrop-blur-md flex items-center justify-center p-6 animate-slide-up" onClick={() => setShowExportSelector(false)}>
             <div className="bg-slate-900 border-[3px] border-emerald-600 rounded-3xl p-8 max-w-sm w-full shadow-[0_0_50px_rgba(16,185,129,0.3)] space-y-6" onClick={e => e.stopPropagation()}>
                 <div className="text-center">
@@ -496,7 +496,7 @@ function App() {
     );
 
     // --- FAVORITES LIST MODAL ---
-    const FavoritesListModal = () => {
+    const renderFavoritesListModal = () => {
         const [tab, setTab] = useState<'vocab' | 'kanji'>('vocab');
         const favItems = db.vocab.filter(v => db.favorites.includes(String(v.id)));
         const list = favItems.filter(v => v.type === tab);
@@ -553,7 +553,7 @@ function App() {
     };
 
     // --- CONFIRM MODAL ---
-    const ConfirmModal = () => {
+    const renderConfirmModal = () => {
         if (!confirmModal) return null;
         return (
             <div className="absolute inset-0 z-[80] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6 animate-slide-up">
@@ -637,7 +637,7 @@ function App() {
                     <div>CHƯA CÓ DỮ LIỆU {studyType === 'vocab' ? 'TỪ VỰNG' : 'KANJI'}</div>
                     <button onClick={handleBack} className="px-6 py-2 bg-slate-800 rounded-lg text-white text-xs uppercase">Quay lại</button>
                 </div>;
-                if (currentIndex >= activeVocab.length) return <CompletionScreen />;
+                if (currentIndex >= activeVocab.length) return renderCompletionScreen();
                 return <StudyView 
                     vocab={activeVocab[currentIndex]} 
                     index={currentIndex} 
@@ -670,48 +670,48 @@ function App() {
                     <div className="absolute inset-0 flex items-center justify-center p-4 md:p-6 bg-slate-950/80 backdrop-blur-xl animate-slide-up z-50">
                         <div className="flex flex-col md:flex-row gap-4 md:gap-6 max-w-4xl w-full h-full md:h-auto max-h-[90vh]">
                             {/* LEFT PANEL: INFO */}
-                            <div className="flex-1 bg-gradient-to-br from-slate-900 to-slate-950 border-2 border-indigo-500 rounded-3xl p-4 md:p-8 relative overflow-hidden flex flex-col justify-center shadow-[0_0_40px_rgba(99,102,241,0.3)] shrink-0 min-h-[250px]">
+                            <div className="md:w-1/3 bg-gradient-to-br from-slate-900 to-slate-950 border-2 border-indigo-500 rounded-3xl p-4 md:p-6 relative overflow-hidden flex flex-col justify-center shadow-[0_0_40px_rgba(99,102,241,0.3)] shrink-0 min-h-[200px]">
                                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
                                 
-                                {/* RESET BUTTON - TOP LEFT */}
-                                <button 
-                                    onClick={() => setShowResetSelector(true)}
-                                    className="absolute top-3 left-3 md:top-4 md:left-4 z-[60] px-3 py-1.5 md:px-4 md:py-2 bg-rose-950/90 border border-rose-500 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest text-rose-400 hover:bg-rose-600 hover:text-white hover:border-white transition-all shadow-xl active:scale-95"
-                                >
-                                    <i className="fas fa-undo-alt mr-2"></i> Học lại
-                                </button>
-
-                                {/* SHUFFLE ICON - TOP RIGHT OR NEAR TITLE */}
+                                {/* SHUFFLE ICON */}
                                 <button
                                     onClick={toggleShuffleMode}
-                                    className={`absolute top-3 right-3 md:top-4 md:right-4 z-[60] w-8 h-8 md:w-10 md:h-10 rounded-xl border flex items-center justify-center transition-all ${db.config.writingMode === 'shuffle' ? 'bg-sky-500 text-white border-sky-400 shadow-[0_0_15px_#0ea5e9]' : 'bg-slate-800 text-slate-500 border-slate-600 hover:border-sky-500 hover:text-sky-400'}`}
+                                    className={`absolute top-3 right-3 z-[60] w-8 h-8 rounded-xl border flex items-center justify-center transition-all ${db.config.writingMode === 'shuffle' ? 'bg-sky-500 text-white border-sky-400 shadow-[0_0_15px_#0ea5e9]' : 'bg-slate-800 text-slate-500 border-slate-600 hover:border-sky-500 hover:text-sky-400'}`}
                                     title="Chế độ Trộn từ"
                                 >
-                                    <i className="fas fa-shuffle text-xs md:text-sm"></i>
+                                    <i className="fas fa-shuffle text-xs"></i>
                                 </button>
 
-                                <div className="absolute top-0 right-0 p-4 opacity-10 text-6xl md:text-9xl text-white font-black italic">#{lessonId}</div>
-                                <div className="relative z-10 mt-4 md:mt-8">
-                                    <div className="text-xs md:text-sm font-black text-indigo-400 uppercase tracking-widest mb-1 md:mb-2">Đang chọn</div>
-                                    <h2 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter mb-4 md:mb-6 drop-shadow-lg">BÀI {lessonId}</h2>
+                                <div className="absolute top-0 right-0 p-4 opacity-10 text-5xl md:text-7xl text-white font-black italic">#{lessonId}</div>
+                                <div className="relative z-10 mt-4">
+                                    <div className="text-[10px] md:text-xs font-black text-indigo-400 uppercase tracking-widest mb-1">Đang chọn</div>
+                                    <h2 className="text-3xl md:text-5xl font-black text-white italic tracking-tighter mb-4 drop-shadow-lg">BÀI {lessonId}</h2>
                                     
-                                    <div className="space-y-3 md:space-y-4">
+                                    {/* RESET BUTTON MOVED HERE */}
+                                    <button 
+                                        onClick={() => setShowResetSelector(true)}
+                                        className="mb-4 px-3 py-1.5 bg-rose-950/90 border border-rose-500 rounded-lg text-[10px] font-black uppercase tracking-widest text-rose-400 hover:bg-rose-600 hover:text-white hover:border-white transition-all shadow-xl active:scale-95 flex items-center w-fit"
+                                    >
+                                        <i className="fas fa-undo-alt mr-2"></i> Học lại
+                                    </button>
+
+                                    <div className="space-y-3">
                                          {/* TYPE TOGGLE */}
-                                        <div className="flex bg-slate-950/50 p-1.5 md:p-2 rounded-xl border border-white/10 backdrop-blur-sm">
+                                        <div className="flex bg-slate-950/50 p-1.5 rounded-xl border border-white/10 backdrop-blur-sm">
                                             <button 
                                                 onClick={() => setStudyType('vocab')}
-                                                className={`flex-1 py-2 md:py-3 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest transition ${studyType === 'vocab' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg border border-white/20' : 'text-slate-500 hover:text-white'}`}
+                                                className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition ${studyType === 'vocab' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg border border-white/20' : 'text-slate-500 hover:text-white'}`}
                                             >
                                                 Từ Vựng
                                             </button>
                                             <button 
                                                 onClick={() => setStudyType('kanji')}
-                                                className={`flex-1 py-2 md:py-3 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest transition ${studyType === 'kanji' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg border border-white/20' : 'text-slate-500 hover:text-white'}`}
+                                                className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition ${studyType === 'kanji' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg border border-white/20' : 'text-slate-500 hover:text-white'}`}
                                             >
                                                 Kanji
                                             </button>
                                         </div>
-                                        <div className="text-[10px] md:text-xs text-slate-400 font-bold italic bg-black/20 p-2 rounded-lg border border-white/5">
+                                        <div className="text-[9px] md:text-[10px] text-slate-400 font-bold italic bg-black/20 p-2 rounded-lg border border-white/5">
                                             * Chọn chế độ để bắt đầu. <br/>
                                             {db.config.writingMode === 'shuffle' ? <span className="text-sky-400 glow-text">⚡ Đang bật chế độ Trộn Ngẫu Nhiên</span> : <span className="text-slate-300">⬇️ Đang bật chế độ Tuần Tự</span>}
                                         </div>
@@ -719,10 +719,8 @@ function App() {
                                 </div>
                             </div>
 
-
-
                             {/* RIGHT PANEL: ACTIONS */}
-                            <div className="flex-1 space-y-2 md:space-y-3 flex flex-col justify-start overflow-y-auto pr-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+                            <div className="flex-1 space-y-2 flex flex-col justify-start overflow-y-auto pr-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
                                 {/* 1. LIST (Danh sách) */}
                                 <button onClick={() => { setMode('study'); changeView('study'); }} className="w-full py-4 md:py-5 px-4 md:px-6 border-l-4 border-indigo-500 bg-gradient-to-r from-slate-900 to-slate-800 hover:from-indigo-900/40 hover:to-slate-800 hover:translate-x-2 transition-all flex items-center gap-3 md:gap-4 group rounded-r-xl border-y border-r border-slate-700 hover:border-indigo-500/50 shrink-0 shadow-lg">
                                     <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-indigo-900/50 flex items-center justify-center text-indigo-400 group-hover:text-white group-hover:bg-indigo-600 transition shadow-[0_0_10px_rgba(99,102,241,0.3)]"><i className="fas fa-list text-xs md:text-base"></i></div>
@@ -799,7 +797,7 @@ function App() {
                     <button onClick={handleBack} className="px-4 py-2 bg-slate-800 rounded text-xs text-white">Quay lại</button>
                 </div>;
                 
-                if (currentIndex >= activeVocab.length) return <CompletionScreen />;
+                if (currentIndex >= activeVocab.length) return renderCompletionScreen();
 
                 return <TypingModeView 
                     vocabList={activeVocab} 
@@ -831,7 +829,7 @@ function App() {
                      );
                 }
 
-                if (activeVocab.length > 0 && currentIndex >= activeVocab.length) return <CompletionScreen />;
+                if (activeVocab.length > 0 && currentIndex >= activeVocab.length) return renderCompletionScreen();
 
                 if (activeVocab.length === 0 || !activeVocab[currentIndex]) return <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-slate-500 font-black uppercase">
                     <div>CHƯA CÓ DỮ LIỆU {studyType.toUpperCase()}</div>
@@ -846,7 +844,7 @@ function App() {
                 </div>;
                 return <CramModeView vocabList={activeVocab} lessonId={lessonId!} db={db} onUpdateDb={handleUpdateDb} onClose={handleBack} />;
             case 'writing':
-                if (activeVocab.length > 0 && currentIndex >= activeVocab.length) return <CompletionScreen />;
+                if (activeVocab.length > 0 && currentIndex >= activeVocab.length) return renderCompletionScreen();
 
                 if (activeVocab.length === 0 || !activeVocab[currentIndex]) return <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-slate-500 font-black uppercase">
                     <div>CHƯA CÓ DỮ LIỆU {studyType.toUpperCase()}</div>
@@ -939,11 +937,11 @@ function App() {
             onCheckIn={handleCheckIn}
         >
             {renderContent()}
-            {showResetSelector && <ResetSelectorModal />}
-            {showExportSelector && <ExportSelectorModal />}
-            {showFavModal && <FavoritesListModal />}
-            {confirmModal && <ConfirmModal />}
-            {showFireworks && <Fireworks />}
+            {showResetSelector && renderResetSelectorModal()}
+            {showExportSelector && renderExportSelectorModal()}
+            {showFavModal && renderFavoritesListModal()}
+            {confirmModal && renderConfirmModal()}
+            {showFireworks && renderFireworks()}
             {notification && (
                 <div className="absolute top-16 left-1/2 -translate-x-1/2 z-[100] animate-slide-up px-6 py-3 rounded-full border-2 bg-slate-900 border-indigo-500 text-white font-black uppercase text-xs shadow-2xl">
                     {notification.message}
